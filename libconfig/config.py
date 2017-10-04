@@ -9,7 +9,7 @@
 # @date:   2017-10-03 14:59:01
 #
 # @last modified by:   jaume.bonet
-# @last modified time: 2017-10-04 08:45:23
+# @last modified time: 2017-10-04 10:00:16
 #
 # -*-
 import json
@@ -42,6 +42,9 @@ def _secondary_df( key, subkey ):
     df = _primary_df( key )
     return df[ ( df["secondary-key"] == _subkey) ]
 
+def _options_to_dict():
+    pass
+
 def register_option( key, subkey, default, _type, locked = False ):
     eval( default, _type )
     _key    = key.lower()
@@ -61,11 +64,25 @@ def get_option( key, subkey ):
     else:
         df = _secondary_df( _key, _subkey )
         if df["type"].values[0] == "bool":
-            return bool(df["value"].values[0])
+            return bool( df["value"].values[0] )
         elif df["type"].values[0] == "int":
-            return int(df["value"].values[0])
+            return int( df["value"].values[0] )
         else:
             return df["value"].values[0]
+
+def get_option_default( key, subkey ):
+    _key    = key.lower()
+    _subkey = subkey.lower()
+    if not _has_secondary_key( _key, _subkey ):
+        raise KeyError("{0}.{1} option is not registered".format(_key, _subkey))
+    else:
+        df = _secondary_df( _key, _subkey )
+        if df["type"].values[0] == "bool":
+            return bool( df["default"].values[0] )
+        elif df["type"].values[0] == "int":
+            return int( df["default"].values[0] )
+        else:
+            return df["default"].values[0]
 
 def set_option( key, subkey, value ):
     _key = key.lower()
@@ -137,3 +154,9 @@ def set_options_from_dict( data_dict ):
             raise ValueError("The input data has to be a dictionary of dictionaries")
         for sk in data_dict[k]:
             set_option( k, sk, data_dict[k][sk] )
+
+def write_options_to_YAML( filename ):
+    pass
+
+def write_options_to_JSON( filename ):
+    pass
