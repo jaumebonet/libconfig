@@ -9,7 +9,7 @@
 # @date:   2017-10-03 14:59:01
 #
 # @last modified by:   jaume.bonet
-# @last modified time: 2017-10-04 10:00:16
+# @last modified time: 2017-10-04 23:14:33
 #
 # -*-
 import json
@@ -43,7 +43,13 @@ def _secondary_df( key, subkey ):
     return df[ ( df["secondary-key"] == _subkey) ]
 
 def _options_to_dict():
-    pass
+    kolums = ["primary-key", "secondary-key", "value"]
+    d  = _global_config[kolums].values.tolist()
+    dc = {}
+    for x in d:
+        dc.setdefault(x[0], {})
+        dc[x[0]][x[1]] = x[2]
+    return dc
 
 def register_option( key, subkey, default, _type, locked = False ):
     eval( default, _type )
@@ -156,7 +162,11 @@ def set_options_from_dict( data_dict ):
             set_option( k, sk, data_dict[k][sk] )
 
 def write_options_to_YAML( filename ):
-    pass
+    fd = open( filename )
+    yaml.dump( _options_to_dict(), fd, default_flow_style=False )
+    fd.close()
 
 def write_options_to_JSON( filename ):
-    pass
+    fd = open( filename )
+    fd.write( json.dumps( _options_to_dict(), indent=2, separators=(',', ': ') ) )
+    fd.close()
