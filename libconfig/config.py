@@ -8,8 +8,8 @@
 #
 # @date:   2017-10-03 14:59:01
 #
-# @last modified by:   jaume.bonet
-# @last modified time: 2017-10-04 23:14:33
+# @Last modified by:   bonet
+# @Last modified time: 12-Oct-2017
 #
 # -*-
 import json
@@ -18,10 +18,12 @@ import os
 import pandas as pd
 import yaml
 
-from evaluator import eval
+from evaluator import eval, cast
+
+pd.set_option( 'display.max_colwidth', -1 )
 
 _columns = [ "primary-key", "secondary-key",
-             "value", "type", "default", "locked" ]
+             "value", "type", "default", "locked", "description" ]
 
 _global_config = pd.DataFrame( columns = _columns )
 
@@ -51,12 +53,12 @@ def _options_to_dict():
         dc[x[0]][x[1]] = x[2]
     return dc
 
-def register_option( key, subkey, default, _type, locked = False ):
+def register_option( key, subkey, default, _type, definition, locked = False ):
     eval( default, _type )
     _key    = key.lower()
     _subkey = subkey.lower()
     if not _has_primary_key( _key ) or not _has_secondary_key( _key, _subkey ):
-        new_opt = pd.Series([key, subkey, default, _type, default, locked], index=_columns)
+        new_opt = pd.Series([key, subkey, default, _type, default, locked, definition], index=_columns)
         global _global_config
         _global_config = _global_config.append(new_opt, ignore_index = True)
     else:
@@ -90,8 +92,17 @@ def get_option_default( key, subkey ):
         else:
             return df["default"].values[0]
 
+def get_option_description( key, subkey ):
+    _key    = key.lower()
+    _subkey = subkey.lower()
+    if not _has_secondary_key( _key, _subkey ):
+        raise KeyError("{0}.{1} option is not registered".format(_key, _subkey))
+    else:
+        df = _secondary_df( _key, _subkey )
+        return df["description"].values[0]
+
 def set_option( key, subkey, value ):
-    _key = key.lower()
+    _key    = key.lower()
     _subkey = subkey.lower()
     if not _has_secondary_key( _key, _subkey ):
         raise KeyError("{0}.{1} option is not registered".format(_key, _subkey))
@@ -104,7 +115,6 @@ def set_option( key, subkey, value ):
         _global_config.loc[
             ( _global_config["primary-key"] == _key ) &
             ( _global_config["secondary-key"] == _subkey), "value" ] = value
-
 
 def reset_option( key, subkey ):
     _key = key.lower()
@@ -159,14 +169,17 @@ def set_options_from_dict( data_dict ):
         if not isinstance( data_dict[k], dict ):
             raise ValueError("The input data has to be a dictionary of dictionaries")
         for sk in data_dict[k]:
+            if isinstance( data_dict[k][sk], unicode ):
+                data_dict[k][sk] = str(data_dict[k][sk])
+            data_dict[k][sk] = cast( data_dict[k][sk], _secondary_df( k, sk )[["type"]].values[0] )
             set_option( k, sk, data_dict[k][sk] )
 
 def write_options_to_YAML( filename ):
-    fd = open( filename )
+    fd = open( filename, "w" )
     yaml.dump( _options_to_dict(), fd, default_flow_style=False )
     fd.close()
 
 def write_options_to_JSON( filename ):
-    fd = open( filename )
+    fd = open( filename, "w" )
     fd.write( json.dumps( _options_to_dict(), indent=2, separators=(',', ': ') ) )
     fd.close()

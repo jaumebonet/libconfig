@@ -8,8 +8,8 @@
 #
 # @date:   2017-10-03 15:19:32
 #
-# @last modified by:   jaume.bonet
-# @last modified time: 2017-10-03 17:49:47
+# @Last modified by:   bonet
+# @Last modified time: 12-Oct-2017
 #
 # -*-
 import os
@@ -22,8 +22,9 @@ def is_path( value ):
 
 
 _TYPES = {
-    "int": is_int, "float": is_float, "bool": is_bool,
-    "text": is_text, "string": is_text, "path": is_path
+    "int": is_int,      "float": is_float, "bool":is_bool,
+    "text": is_text,    "string": is_text,
+    "path_in": is_path, "path_out": is_text
 }
 
 
@@ -33,3 +34,10 @@ def eval( value, _type ):
         raise KeyError( "{0} is not a known value type; accepted are {1}".format(_type, ",".join(_TYPES.keys() ) ) )
 
     return _TYPES[_type]( value )
+
+def cast( value, _type ):
+    if _type == "bool":
+        return bool( value )
+    if _type == "int":
+        return int( value )
+    return value
