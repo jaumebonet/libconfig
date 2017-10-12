@@ -6,8 +6,8 @@
     "python", "configuration"
   ],
   "dependencies": {
-    "pandas": "^0.19",
-    "pyyaml": "^3.12"
+    "pandas": "pandas-dev/pandas",
+    "pyyaml": "yaml/pyyaml"
   },
   "repository": {
     "type": "git",
