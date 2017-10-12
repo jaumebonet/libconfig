@@ -1,0 +1,15 @@
+{
+  "paths": {
+    "out.json": "configs.json",
+    "out.yaml": "configs.yaml",
+    "in": "demo.ipynb"
+  },
+  "no_number": {
+    "text": "the_string",
+    "boolean": 1.0
+  },
+  "number": {
+    "integer": 5.0,
+    "float": 5.5
+  }
+}

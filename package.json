@@ -1,0 +1,23 @@
+{
+  "name": "libconfig",
+  "version": "0.4.0",
+  "description": "Library Configuration Library",
+  "keywords": [
+    "python", "configuration"
+  ],
+  "dependencies": {
+    "pandas": "^0.19",
+    "pyyaml": "^3.12"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/jaumebonet/libconfig"
+  },
+  "homepage": "http://github.com/jaumebonet/libconfig",
+  "bugs": "http://github.com/jaumebonet/libconfig/issues",
+  "author": {
+    "name": "Jaume Boent",
+    "email": "jaume.bonet@gmail.com"
+  },
+  "license": "MIT"
+}
