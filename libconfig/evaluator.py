@@ -9,14 +9,14 @@
 # @date:   2017-10-03 15:19:32
 #
 # @Last modified by:   bonet
-# @Last modified time: 12-Oct-2017
+# @Last modified time: 19-Oct-2017
 #
 # -*-
 import os
 from pandas.core.config import (is_int, is_float, is_bool, is_text)
 
 def is_path( value ):
-    if not os.path.isfile( value ) or os.path.isdir( value ):
+    if not os.path.isfile( value ) and not os.path.isdir( value ):
         msg = "Value must be an instance of {type_repr}"
         raise ValueError(msg.format(type_repr="path"))
 
