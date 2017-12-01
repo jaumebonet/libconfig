@@ -7,9 +7,7 @@
 # @url:    jaumebonet.cat
 #
 # @date:   2017-10-03 15:19:32
-#
-# @Last modified by:   bonet
-# @Last modified time: 19-Oct-2017
+# @Last modified time: 01-Dec-2017
 #
 # -*-
 import os

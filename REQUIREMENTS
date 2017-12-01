@@ -1,2 +1,2 @@
 pandas>=0.19
-yaml>=3.12
+pyyaml>=3.12

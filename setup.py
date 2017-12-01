@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages  # Always prefer setuptools over distutils
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 
 setup(
     name='libconfig',
