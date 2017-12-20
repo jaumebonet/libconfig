@@ -7,7 +7,7 @@
 # @url:    jaumebonet.cat
 #
 # @date:   2017-10-03 14:59:01
-# @Last modified time: 01-Dec-2017
+# @Last modified time: 20-Dec-2017
 #
 # -*-
 import json
@@ -21,7 +21,7 @@ from evaluator import eval, cast
 pd.set_option( 'display.max_colwidth', -1 )
 
 _columns = [ "primary-key", "secondary-key",
-             "value", "type", "default", "locked", "description" ]
+             "value", "type", "default", "locked", "description", "values" ]
 
 _global_config = pd.DataFrame( columns = _columns )
 
@@ -51,7 +51,7 @@ def _options_to_dict():
         dc[x[0]][x[1]] = x[2]
     return dc
 
-def register_option( key, subkey, default, _type, definition, locked = False ):
+def register_option( key, subkey, default, _type, definition, values=None, locked = False ):
     """
     Create a new option.
     :param str key: First identifier of the option.
@@ -59,6 +59,8 @@ def register_option( key, subkey, default, _type, definition, locked = False ):
     :param default: Default value of the option (type varies).
     :param str _type: Type of the value of the option: [int, float, bool, text, string, path_in, path_out].
     :param str definition: String explaining the option.
+    :param list values: Available values for the option.
+    :param bool locked: If True, option cannot be altered.
 
     :raise: KeyError if 'key' or 'subkey' already define an option
 
@@ -67,7 +69,7 @@ def register_option( key, subkey, default, _type, definition, locked = False ):
     _key    = key.lower()
     _subkey = subkey.lower()
     if not _has_primary_key( _key ) or not _has_secondary_key( _key, _subkey ):
-        new_opt = pd.Series([key, subkey, default, _type, default, locked, definition], index=_columns)
+        new_opt = pd.Series([key, subkey, default, _type, default, locked, definition, values], index=_columns)
         global _global_config
         _global_config = _global_config.append(new_opt, ignore_index = True)
     else:
@@ -134,6 +136,23 @@ def get_option_description( key, subkey ):
         df = _secondary_df( _key, _subkey )
         return df["description"].values[0]
 
+def get_option_alternatives( key, subkey ):
+    """
+    Get list of available values for an option.
+    :param str key: First identifier of the option.
+    :param str subkey: Second identifier of the option.
+    :return: List with alternatives or None if field is open.
+
+    :raise: KeyError if 'key' or 'subkey' do not define any option.
+    """
+    _key    = key.lower()
+    _subkey = subkey.lower()
+    if not _has_secondary_key( _key, _subkey ):
+        raise KeyError("{0}.{1} option is not registered".format(_key, _subkey))
+    else:
+        df = _secondary_df( _key, _subkey )
+        return df["values"].values[0]
+
 def set_option( key, subkey, value ):
     """
     Sets the value of an option
@@ -151,9 +170,12 @@ def set_option( key, subkey, value ):
         raise KeyError("{0}.{1} option is not registered".format(_key, _subkey))
     else:
         df = _secondary_df( _key, _subkey )
-        eval( value, df["type"].values[0] )
         if df["locked"].values[0]:
             raise ValueError("{0}.{1} option is locked".format(_key, _subkey))
+        eval( value, df["type"].values[0] )
+        if df["values"].values[0] is not None:
+            if value not in df["values"].values[0]:
+                raise ValueError("{0}.{1} accepted options are: ".format(_key, _subkey, ",".join(df["values"].values[0])))
         global _global_config
         _global_config.loc[
             ( _global_config["primary-key"] == _key ) &
