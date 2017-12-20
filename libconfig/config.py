@@ -163,6 +163,7 @@ def set_option( key, subkey, value ):
     :raise: KeyError if 'key' or 'subkey' do not define any option.
     :raise: ValueError if the targeted obtion is locked.
     :raise: ValueError if the provided value is not the expected type for the option.
+    :raise: ValueError if the provided value is not in the expected available values for the option.
     """
     _key    = key.lower()
     _subkey = subkey.lower()
@@ -180,6 +181,29 @@ def set_option( key, subkey, value ):
         _global_config.loc[
             ( _global_config["primary-key"] == _key ) &
             ( _global_config["secondary-key"] == _subkey), "value" ] = value
+
+def check_option( key, subkey, value ):
+    """
+    If an option has a limited set of available values, check if the provided
+    value is amongst them.
+    :param str key: First identifier of the option.
+    :param str subkey: Second identifier of the option.
+    :param value: Value to test (type varies).
+
+    :raise: KeyError if 'key' or 'subkey' do not define any option.
+    :raise: ValueError if the provided value is not the expected type for the option.
+    :raise: ValueError if the provided value is not in the expected available values for the option.
+    """
+    _key    = key.lower()
+    _subkey = subkey.lower()
+    if not _has_secondary_key( _key, _subkey ):
+        raise KeyError("{0}.{1} option is not registered".format(_key, _subkey))
+    else:
+        df = _secondary_df( _key, _subkey )
+        eval( value, df["type"].values[0] )
+        if df["values"].values[0] is not None:
+            if value not in df["values"].values[0]:
+                raise ValueError("{0}.{1} accepted options are: ".format(_key, _subkey, ",".join(df["values"].values[0])))
 
 def reset_option( key, subkey ):
     """
