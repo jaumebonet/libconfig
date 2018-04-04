@@ -13,10 +13,12 @@ install:
 
 script:
   - python setup.py install
-  - pytest --cov-config .coveragerc --cov-report xml:/tmp/cov-single.xml --cov=libconfig libconfig/tests
+  - pytest --strict --cov-config .coveragerc --cov-report xml:/tmp/cov-single.xml --cov=libconfig libconfig
+  - coverage combine
   - coverage report --show-missing
 
 after_success:
+  - coveralls                     # Add me to upload reports to coveralls.io
   - bash <(curl -s https://codecov.io/bash) -Z -c -f /tmp/cov-single.xml
 
 deploy:
