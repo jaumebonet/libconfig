@@ -46,7 +46,7 @@ def entry_must_exist(func):
     configuration options.
     """
     def wrapper(*args, **kwargs):
-        from config import _global_config as cfg
+        from .config import _global_config as cfg
         k1 = kwargs['key'] if 'key' in kwargs else args[0]
         k2 = kwargs['subkey'] if 'subkey' in kwargs else args[1]
         count = cfg[(cfg['primary-key'] == k1) &
@@ -63,7 +63,7 @@ def entry_must_not_exist(func):
     configuration options.
     """
     def wrapper(*args, **kwargs):
-        from config import _global_config as cfg
+        from .config import _global_config as cfg
         k1 = kwargs['key'] if 'key' in kwargs else args[0]
         k2 = kwargs['subkey'] if 'subkey' in kwargs else args[1]
         count = cfg[(cfg['primary-key'] == k1) &
