@@ -1,5 +1,7 @@
 language: python
 
+sudo: false
+
 matrix:
   include:
     - python: 2.7
@@ -10,7 +12,7 @@ matrix:
       os: linux
       after_success:
         - pwd
-        - coveralls
+        - coveralls --data_file=libconfig/tests/.coverage
         - bash <(curl -s https://codecov.io/bash) -Z -c -f /tmp/cov-single.xml
     - python: 3.5
       env: TOXENV=py35
@@ -21,6 +23,7 @@ matrix:
 
 install:
   - pip install tox
+  - if [[ $TOXENV == py34 ]]; then pip install pyyaml; fi
   - if [[ $TOXENV == py34 ]]; then pip install coveralls; fi
 
 script:
