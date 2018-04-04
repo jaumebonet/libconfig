@@ -10,10 +10,11 @@ install:
   - pip install coverage coveralls
   - pip install python-coveralls  # Add me to install python-coveralls
   - pip install pytest pytest-cov
+  - pip install .
 
 script:
   - python setup.py install
-  - pytest --strict --cov-config .coveragerc --cov-report xml:/tmp/cov-single.xml --cov=libconfig libconfig
+  - pytest --strict --cov-config .coveragerc --cov-report xml:/tmp/cov-single.xml --cov libconfig
   - coverage combine
   - coverage report --show-missing
 
