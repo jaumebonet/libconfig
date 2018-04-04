@@ -6,7 +6,7 @@ python:
 - '3.6'
 
 install:
-  - pip install -r REQUIREMENTS.txt
+  - pip install -r REQUIREMENTS
 
 script:
 - touch foo
