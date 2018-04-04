@@ -16,8 +16,8 @@ import os
 import pandas as pd
 import yaml
 
-import evaluator as ev
-import util
+import libconfig.evaluator as ev
+import libconfig.util as util
 
 
 pd.set_option('display.max_colwidth', -1)
