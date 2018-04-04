@@ -1,26 +1,28 @@
 language: python
 
-python:
-- '2.7'
-- '3.5'
-- '3.6'
+matrix:
+  include:
+    - python: 2.7
+      env: TOXENV=py27
+    - python: 3.4
+      env: TOXENV=py34
+      after_success:
+        - coveralls
+        - bash <(curl -s https://codecov.io/bash) -Z -c -f /tmp/cov-single.xml
+    - python: 3.5
+      env: TOXENV=py35
+    - python: 3.6
+      env: TOXENV=py36
+    - python: pypy
+      env: TOXENV=pypy
+    - python: jython
+      env: TOXENV=jython
 
 install:
-  - pip install -r REQUIREMENTS
-  - pip install coverage coveralls
-  - pip install python-coveralls  # Add me to install python-coveralls
-  - pip install pytest pytest-cov
-  - pip install .
+  - pip install tox
 
 script:
-  - python setup.py install
-  - pytest --strict --cov-config .coveragerc --cov-report xml:/tmp/cov-single.xml --cov libconfig
-  - coverage combine
-  - coverage report --show-missing
-
-after_success:
-  - coveralls                     # Add me to upload reports to coveralls.io
-  - bash <(curl -s https://codecov.io/bash) -Z -c -f /tmp/cov-single.xml
+  - tox
 
 deploy:
   provider: pypi
@@ -30,4 +32,4 @@ deploy:
   on:
     tags: true
     branch: master
-    condition: $TRAVIS_PYTHON_VERSION == '3.5'
+    condition: $TRAVIS_PYTHON_VERSION == '3.4'
