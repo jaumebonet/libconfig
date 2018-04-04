@@ -29,7 +29,7 @@ __all__ = ["register_option", "reset_option", "reset_options", "set_option",
            "set_options_from_YAML", "get_option", "get_option_default",
            "get_option_description", "write_options_to_JSON",
            "write_options_to_YAML", "show_options", "lock_option",
-           "check_option"]
+           "check_option", "get_option_alternatives"]
 
 
 _columns = ["primary-key", "secondary-key", "value", "type",
@@ -306,13 +306,22 @@ def show_options(key=""):
     return _global_config[(_global_config["primary-key"] == key)].copy()
 
 
-def reset_options():
+def reset_options(empty=True):
     """
     Empty ALL options.
+
+    :param empty: When :data:`True`, completelly removes all options; when
+        :data:`False`, sets them back to its original value.
+    :type empty: :class:`bool`
+
     This function skips ``locked`` control.
     """
     global _global_config
-    _global_config = pd.DataFrame(columns=_columns)
+
+    if empty:
+        _global_config = pd.DataFrame(columns=_columns)
+    else:
+        _global_config["value"] = _global_config["default"]
 
 
 def set_options_from_YAML(filename):
