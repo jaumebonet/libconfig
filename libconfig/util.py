@@ -6,7 +6,10 @@
 # @Last modified time: 04-Apr-2018
 
 
-__all__ = ["lower_keynames"]
+from functools import wraps
+
+
+__all__ = ["lower_keynames", "entry_must_exist", "entry_must_not_exist"]
 
 
 def parametrized(dec):
@@ -26,6 +29,7 @@ def lower_keynames(func):
     *Decorator*. The decorated function will have the first to arguments
     (or arguments ``key`` and ``subkey``) lowercased.
     """
+    @wraps(func)
     def wrapper(*args, **kwargs):
         new_args = []
         for i, _ in enumerate(args):
@@ -45,6 +49,7 @@ def entry_must_exist(func):
     *Decorator*. Checks that the key-subkey combo exists in the
     configuration options.
     """
+    @wraps(func)
     def wrapper(*args, **kwargs):
         from .config import _global_config as cfg
         k1 = kwargs['key'] if 'key' in kwargs else args[0]
@@ -62,6 +67,7 @@ def entry_must_not_exist(func):
     *Decorator*. Checks that the key-subkey combo does not exists in the
     configuration options.
     """
+    @wraps(func)
     def wrapper(*args, **kwargs):
         from .config import _global_config as cfg
         k1 = kwargs['key'] if 'key' in kwargs else args[0]
