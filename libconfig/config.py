@@ -23,6 +23,14 @@ import util
 pd.set_option('display.max_colwidth', -1)
 
 
+__all__ = ["register_option", "reset_option", "reset_options", "set_option",
+           "set_options_from_dict", "set_options_from_JSON",
+           "set_options_from_YAML", "get_option", "get_option_default",
+           "get_option_description", "write_options_to_JSON",
+           "write_options_to_YAML", "show_options", "lock_option",
+           "check_option"]
+
+
 _columns = ["primary-key", "secondary-key", "value", "type",
             "default", "locked", "description", "values"]
 
@@ -251,10 +259,11 @@ def reset_option(key, subkey):
     df = _get_df(key, subkey)
     if df["locked"].values[0]:
         raise ValueError("{0}.{1} option is locked".format(key, subkey))
+    val = df["default"].values[0]
     global _global_config
     _global_config.loc[
         (_global_config["primary-key"] == key) &
-        (_global_config["secondary-key"] == subkey), "value"] = df["default"].values[0]
+        (_global_config["secondary-key"] == subkey), "value"] = val
 
 
 @util.entry_must_exist
@@ -334,7 +343,8 @@ def set_options_from_JSON(filename):
     """
     if not os.path.isfile(filename):
         raise IOError("File {0} not found".format(filename))
-    data_dict = json.loads("".join([x.strip() for x in open(filename).readlines()]))
+    data_str = "".join([x.strip() for x in open(filename).readlines()])
+    data_dict = json.loads(data_str)
     set_options_from_dict(data_dict)
 
 
@@ -343,15 +353,16 @@ def set_options_from_dict(data_dict):
     Load options from a dictionary.
 
     :param data_dict: Dictionary with the options to load.
-    :param data_dict: :class:`dict`
+    :type data_dict: :class:`dict`
     """
     for k in data_dict:
         if not isinstance(data_dict[k], dict):
-            raise ValueError("The input data has to be a dictionary of dictionaries")
+            raise ValueError("The input data has to be a dict of dict")
         for sk in data_dict[k]:
             if isinstance(data_dict[k][sk], unicode):
                 data_dict[k][sk] = str(data_dict[k][sk])
-            data_dict[k][sk] = ev.cast(data_dict[k][sk], _get_df(k, sk)[["type"]].values[0])
+            _type = _get_df(k, sk)[["type"]].values[0]
+            data_dict[k][sk] = ev.cast(data_dict[k][sk], _type)
             if get_option(k, sk) != data_dict[k][sk]:
                 set_option(k, sk, data_dict[k][sk])
 

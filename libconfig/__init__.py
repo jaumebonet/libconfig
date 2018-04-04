@@ -1,5 +1,8 @@
-from config import register_option, reset_option, reset_options
-from config import set_option, set_options_from_dict, set_options_from_JSON, set_options_from_YAML
-from config import get_option, get_option_default, get_option_description
-from config import write_options_to_JSON, write_options_to_YAML
-from config import show_options, lock_option, check_option
+"""A small library for global parameter configuration.
+
+.. moduleauthor:: Jaume Bonet <jaume.bonet@gmail.com>
+
+"""
+
+
+from config import *

@@ -1,20 +1,17 @@
-from setuptools import setup, find_packages  # Always prefer setuptools over distutils
+from setuptools import setup, find_packages
+
 __version__ = '0.5.0'
 
 setup(
     name='libconfig',
-
-    # Versions should comply with PEP440.  For a discussion on single-sourcing
-    # the version across setup.py and the project code, see
-    # http://packaging.python.org/en/latest/tutorial.html#version
     version=__version__,
 
     description='Library Configuration Library',
-    # long_description=read('README.md'),
+    long_description='A simple tool to generate and manage '
+                     'global configuration variables',
 
     # The project's main homepage.
     url='https://github.com/jaumebonet/libconfig',
-    download_url = 'https://github.com/jaumebonet/libconfig/archive/{0}.tar.gz'.format(__version__),
 
     # Author details
     author='Jaume Bonet',
@@ -36,8 +33,6 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
@@ -49,6 +44,6 @@ setup(
     install_requires=['pandas', 'pyyaml'],
 
     packages=find_packages(exclude=['docs', 'test']),
-
-    zip_safe = False,
+    include_package_data=True,
+    zip_safe=False,
 )
