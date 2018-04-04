@@ -15,6 +15,7 @@ import os
 
 import pandas as pd
 import yaml
+import six
 
 import libconfig.evaluator as ev
 import libconfig.util as util
@@ -359,7 +360,7 @@ def set_options_from_dict(data_dict):
         if not isinstance(data_dict[k], dict):
             raise ValueError("The input data has to be a dict of dict")
         for sk in data_dict[k]:
-            if isinstance(data_dict[k][sk], unicode):
+            if isinstance(data_dict[k][sk], six.string_types):
                 data_dict[k][sk] = str(data_dict[k][sk])
             _type = _get_df(k, sk)[["type"]].values[0]
             data_dict[k][sk] = ev.cast(data_dict[k][sk], _type)
