@@ -1,7 +1,6 @@
 [run]
 branch = False
 omit = */tests/*
-source=libconfig
 
 [report]
 # Regexes for lines to exclude from consideration
