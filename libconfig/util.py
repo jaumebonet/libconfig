@@ -12,18 +12,6 @@ from functools import wraps
 __all__ = ["lower_keynames", "entry_must_exist", "entry_must_not_exist"]
 
 
-def parametrized(dec):
-    """
-    *Decorator*. A decorator for decorators. Allows to create
-    decorators with arguments.
-    """
-    def layer(*args, **kwargs):
-        def repl(f):
-            return dec(f, *args, **kwargs)
-        return repl
-    return layer
-
-
 def lower_keynames(func):
     """
     *Decorator*. The decorated function will have the first to arguments

@@ -374,7 +374,10 @@ def set_options_from_dict(data_dict):
             _type = _get_df(k, sk)[["type"]].values[0]
             data_dict[k][sk] = ev.cast(data_dict[k][sk], _type)
             if get_option(k, sk) != data_dict[k][sk]:
-                set_option(k, sk, data_dict[k][sk])
+                try:
+                    set_option(k, sk, data_dict[k][sk])
+                except ValueError:
+                    pass  # locked options will not be changed
 
 
 def write_options_to_YAML(filename):

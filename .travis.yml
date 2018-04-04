@@ -7,10 +7,17 @@ python:
 
 install:
   - pip install -r REQUIREMENTS
+  - pip install coverage coveralls
+  - pip install python-coveralls  # Add me to install python-coveralls
+  - pip install pytest
+  - pip install pytest-cov
 
 script:
-- touch foo
-- rm foo
+  - python setup.py install
+  - py.test --cov-config .coveragerc --cov=libconfig libconfig/tests
+
+after_success:
+  - coveralls                     # Add me to upload reports to coveralls.io
 
 deploy:
   provider: pypi
@@ -20,4 +27,4 @@ deploy:
   on:
     tags: true
     branch: master
-    condition: $TRAVIS_PYTHON_VERSION == '3.5' 
+    condition: $TRAVIS_PYTHON_VERSION == '3.5'
