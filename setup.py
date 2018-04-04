@@ -40,7 +40,7 @@ setup(
     platforms='UNIX',
     keywords='development',
 
-    install_requires=['pandas', 'pyyaml'],
+    install_requires=['pandas', 'pyyaml', 'six'],
 
     packages=find_packages(exclude=['docs', 'test']),
     include_package_data=True,
