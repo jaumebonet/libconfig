@@ -1,10 +1,17 @@
 language: python
+
 python:
 - '2.7'
 - '3.5'
 - '3.6'
+
+install:
+  - pip install -r REQUIREMENTS.txt
+
 script:
 - touch foo
+- rm foo
+
 deploy:
   provider: pypi
   user: jaume.bonet
