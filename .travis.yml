@@ -9,12 +9,12 @@ install:
   - pip install -r REQUIREMENTS
   - pip install coverage coveralls
   - pip install python-coveralls  # Add me to install python-coveralls
-  - pip install pytest
-  - pip install pytest-cov
+  - pip install pytest pytest-cov
 
 script:
   - python setup.py install
   - py.test --cov-config .coveragerc --cov=libconfig libconfig/tests
+  - coverage report --show-missing
 
 after_success:
   - coveralls                     # Add me to upload reports to coveralls.io
