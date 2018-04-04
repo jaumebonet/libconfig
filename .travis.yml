@@ -18,13 +18,14 @@ matrix:
       os: linux
       after_success:
         - pwd
-        - coveralls
+        - coveralls --rcfile=libconfig/tests/.coverage
         - bash <(curl -s https://codecov.io/bash) -Z -c -f /tmp/cov-single.xml
 
 install:
   - pip install tox
   - if [[ $TOXENV == py36 ]]; then pip install pyyaml; fi
   - if [[ $TOXENV == py36 ]]; then pip install coveralls; fi
+  - if [[ $TOXENV == py36 ]]; then pip install python-coveralls; fi
 
 script:
   - tox
