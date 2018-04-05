@@ -6,3 +6,5 @@ max-line-length: 100
 doc-warnings: true
 ignore-paths:
   - docs
+requirements:
+  - REQUIREMENTS
