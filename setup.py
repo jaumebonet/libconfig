@@ -1,10 +1,11 @@
 from setuptools import setup, find_packages
 
-__version__ = '0.5.0'
+# versioning
+import versioneer
 
 setup(
     name='libconfig',
-    version=__version__,
+    version=versioneer.get_version(),
 
     description='Library Configuration Library',
     long_description='A simple tool to generate and manage '

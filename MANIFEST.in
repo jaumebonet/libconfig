@@ -1,0 +1,2 @@
+include versioneer.py
+include libconfig/_version.py

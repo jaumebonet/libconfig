@@ -1,6 +1,8 @@
 [run]
 branch = False
-omit = */tests/*
+omit =
+    */tests/*
+    */_version.py
 
 [report]
 # Regexes for lines to exclude from consideration
