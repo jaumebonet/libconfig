@@ -1,4 +1,5 @@
+---
 exclude_paths:
-  - libconfig/tests/
-  - */_version.py
-  - versioneer.py
+  - "libconfig/tests/*"
+  - "*/_version.py"
+  - "versioneer.py"
