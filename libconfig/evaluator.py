@@ -7,13 +7,13 @@
 # @url:    jaumebonet.cat
 #
 # @date:   2017-10-03 15:19:32
-# @Last modified time: 04-Apr-2018
+# @Last modified time: 09-Apr-2018
 #
 # -*-
 import os
 from pandas.core.config import (is_int, is_float, is_bool, is_text)
 
-__all__ = ["eval", "cast"]
+__all__ = ["value_eval", "cast"]
 
 
 def is_path(value):
@@ -29,7 +29,7 @@ _TYPES = {
 }
 
 
-def eval(value, _type):
+def value_eval(value, _type):
     _type = _type.lower()
     if _type not in _TYPES:
         info = "{} is not a known value type;".format(_type)

@@ -3,7 +3,7 @@
 # @Email:  jaume.bonet@gmail.com
 # @Filename: util.py
 # @Last modified by:   bonet
-# @Last modified time: 04-Apr-2018
+# @Last modified time: 09-Apr-2018
 
 
 from functools import wraps
@@ -17,6 +17,7 @@ def lower_keynames(func):
     *Decorator*. The decorated function will have the first to arguments
     (or arguments ``key`` and ``subkey``) lowercased.
     """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         new_args = []
@@ -37,6 +38,7 @@ def entry_must_exist(func):
     *Decorator*. Checks that the key-subkey combo exists in the
     configuration options.
     """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         from .config import _global_config as cfg
@@ -55,6 +57,7 @@ def entry_must_not_exist(func):
     *Decorator*. Checks that the key-subkey combo does not exists in the
     configuration options.
     """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         from .config import _global_config as cfg

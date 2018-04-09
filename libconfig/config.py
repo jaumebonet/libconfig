@@ -7,7 +7,7 @@
 # @url:    jaumebonet.cat
 #
 # @date:   2017-10-03 14:59:01
-# @Last modified time: 04-Apr-2018
+# @Last modified time: 09-Apr-2018
 #
 # -*-
 import json
@@ -83,7 +83,7 @@ def register_option(key, subkey, default, _type, definition,
         :KeyError: If ``key`` or ``subkey`` already define an option.
 
     """
-    ev.eval(default, _type)
+    ev.value_eval(default, _type)
     if values is False:
         values = None
     new_opt = pd.Series([key, subkey, default, _type, default,
@@ -204,7 +204,7 @@ def set_option(key, subkey, value):
     df = _get_df(key, subkey)
     if df["locked"].values[0]:
         raise ValueError("{0}.{1} option is locked".format(key, subkey))
-    ev.eval(value, df["type"].values[0])
+    ev.value_eval(value, df["type"].values[0])
     if not check_option(key, subkey, value):
         info = "{0}.{1} accepted options are: ".format(key, subkey)
         info += "[{}]".format(", ".join(df["values"].values[0]))
@@ -236,7 +236,7 @@ def check_option(key, subkey, value):
             type for the option.
     """
     df = _get_df(key, subkey)
-    ev.eval(value, df["type"].values[0])
+    ev.value_eval(value, df["type"].values[0])
     if df["values"].values[0] is not None:
         return value in df["values"].values[0]
     return True
