@@ -13,8 +13,10 @@ __all__ = ["lower_keynames", "entry_must_exist", "entry_must_not_exist"]
 
 
 def lower_keynames(func):
-    """*Decorator*. The decorated function will have the first to arguments
-    (or arguments ``key`` and ``subkey``) lowercased."""
+    """
+    *Decorator*: The decorated function will have the first to arguments
+    (or arguments ``key`` and ``subkey``) lowercased.
+    """
 
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -32,8 +34,10 @@ def lower_keynames(func):
 
 
 def entry_must_exist(func):
-    """*Decorator*. Checks that the key-subkey combo exists in the
-    configuration options."""
+    """
+    *Decorator*: Checks that the key-subkey combo exists in the
+    configuration options.
+    """
 
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -49,8 +53,10 @@ def entry_must_exist(func):
 
 
 def entry_must_not_exist(func):
-    """*Decorator*. Checks that the key-subkey combo does not exists in the
-    configuration options."""
+    """
+    *Decorator*: Checks that the key-subkey combo does not exists in the
+    configuration options.
+    """
 
     @wraps(func)
     def wrapper(*args, **kwargs):

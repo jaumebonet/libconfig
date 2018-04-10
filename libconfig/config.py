@@ -219,6 +219,8 @@ def set_option(key, subkey, value):
 @util.lower_keynames
 def check_option(key, subkey, value):
     """
+    Evaluate if a given value fits the option.
+
     If an option has a limited set of available values, check if the provided
     value is amongst them.
 
@@ -291,6 +293,7 @@ def lock_option(key, subkey):
 def show_options(key=""):
     """
     Returns a copy the options :class:`~pandas.DataFrame`.
+
     Called on jupyter notebook, it will print them in pretty
     :class:`~pandas.DataFrame` format.
 
