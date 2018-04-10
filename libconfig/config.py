@@ -430,7 +430,7 @@ def document_options():
     data.append(separators)
     data.append(line.format('Option Class', 'Option ID', 'Description'))
     data.append(separators)
-    for i, row in _global_config.iterrows():
+    for _, row in _global_config.iterrows():
         data.append(line.format("**" + row['primary-key'] + "**",
                                 "**" + row['secondary-key'] + "**",
                                 row['description']))
