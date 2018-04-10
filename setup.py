@@ -52,5 +52,5 @@ setup(
 
     packages=find_packages(exclude=['docs', 'test', 'sphinx-docs']),
     include_package_data=True,
-    zip_safe=False,
+    cmdclass=versioneer.get_cmdclass(),
 )
