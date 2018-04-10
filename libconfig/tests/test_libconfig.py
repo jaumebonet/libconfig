@@ -3,7 +3,7 @@
 # @Email:  jaume.bonet@gmail.com
 # @Filename: test_libconfig.py
 # @Last modified by:   bonet
-# @Last modified time: 04-Apr-2018
+# @Last modified time: 10-Apr-2018
 
 
 import os
@@ -128,6 +128,23 @@ class TestLibConfig(object):
         assert cfg.get_option("path", "in") == os.getcwd()
         assert cfg.get_option("string", "free_text") == "epsilon"
         assert cfg.get_option("string", "option_text") == "beta"
+
+        data = [
+            '============  =================  ===========',
+            'Option Class          Option ID  Description',
+            '============  =================  ===========',
+            ' **numeric**  **integer_fixed**  this is a fixed integer',
+            ' **numeric**     **float_free**  this is a free float',
+            ' **boolean**        **boolean**  this is a simple boolean.',
+            '  **string**    **option_text**  this string is '
+            'limited to some options.',
+            '  **string**      **free_text**  this string can be anything.',
+            '    **path**             **in**  this path needs to exist.',
+            '    **path**            **out**  this path does not '
+            'need to exist.',
+            '============  =================  ==========='
+        ]
+        assert cfg.document_options() == "\n".join(data)
 
     def test_resets(self):
         """

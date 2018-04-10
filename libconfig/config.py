@@ -29,7 +29,8 @@ __all__ = ["register_option", "reset_option", "reset_options", "set_option",
            "set_options_from_YAML", "get_option", "get_option_default",
            "get_option_description", "write_options_to_JSON",
            "write_options_to_YAML", "show_options", "lock_option",
-           "check_option", "get_option_alternatives"]
+           "check_option", "get_option_alternatives",
+           "document_options"]
 
 
 _columns = ["primary-key", "secondary-key", "value", "type",
@@ -405,3 +406,34 @@ def write_options_to_JSON(filename):
     fd = open(filename, "w")
     fd.write(json.dumps(_options_to_dict(), indent=2, separators=(',', ': ')))
     fd.close()
+
+
+def document_options():
+    """
+    Generates a docstring table to add to the library documentation
+
+    :return: :class:`str`
+    """
+    global _global_config
+
+    k1 = max([len(_) for _ in _global_config['primary-key']]) + 4
+    k1 = max([k1, len('Option Class')])
+    k2 = max([len(_) for _ in _global_config['secondary-key']]) + 4
+    k2 = max([k2, len('Option ID')])
+
+    separators = "  ".join(["".join(["=", ] * k1),
+                            "".join(["=", ] * k2),
+                            "".join(["=", ] * 11)])
+    line = ("{0:>"+str(k1)+"}  {1:>"+str(k2)+"}  {2}")
+
+    data = []
+    data.append(separators)
+    data.append(line.format('Option Class', 'Option ID', 'Description'))
+    data.append(separators)
+    for i, row in _global_config.iterrows():
+        data.append(line.format("**" + row['primary-key'] + "**",
+                                "**" + row['secondary-key'] + "**",
+                                row['description']))
+    data.append(separators)
+
+    return "\n".join(data)
