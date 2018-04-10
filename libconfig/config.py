@@ -7,7 +7,7 @@
 # @url:    jaumebonet.cat
 #
 # @date:   2017-10-03 14:59:01
-# @Last modified time: 09-Apr-2018
+# @Last modified time: 10-Apr-2018
 #
 # -*-
 import json
@@ -337,7 +337,7 @@ def set_options_from_YAML(filename):
     if not os.path.isfile(filename):
         raise IOError("File {0} not found".format(filename))
     stream = open(filename)
-    data_dict = yaml.load(stream)
+    data_dict = yaml.safe_load(stream)
     set_options_from_dict(data_dict)
 
 
