@@ -39,12 +39,18 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
 
+    project_urls={
+        'Documentation': 'http://jaumebonet.cat/libconfig',
+        'Source': 'https://github.com/jaumebonet/libconfig/',
+        'Tracker': 'https://github.com/jaumebonet/libconfig/issues',
+    },
+
     platforms='UNIX',
     keywords='development',
 
     install_requires=['pandas', 'pyyaml', 'six'],
 
-    packages=find_packages(exclude=['docs', 'test']),
+    packages=find_packages(exclude=['docs', 'test', 'sphinx-docs']),
     include_package_data=True,
     zip_safe=False,
 )
