@@ -19,6 +19,7 @@ exclude_lines =
     raise NotImplementedError
     raise IOError
     raise ValueError
+    raise Exception
 
     # Don't complain if non-runnable code isn't run:
     if 0:

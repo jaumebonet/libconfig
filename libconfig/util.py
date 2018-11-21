@@ -3,7 +3,7 @@
 # @Email:  jaume.bonet@gmail.com
 # @Filename: util.py
 # @Last modified by:   bonet
-# @Last modified time: 10-Apr-2018
+# @Last modified time: 21-Nov-2018
 
 
 from functools import wraps
@@ -16,7 +16,7 @@ def lower_keynames(func):
     """
     *Decorator* to lowercase string attributes.
 
-    The decorated function will have the first to arguments
+    The decorated function will have the first two arguments
     (or arguments ``key`` and ``subkey``) lowercased.
     """
     @wraps(func)
