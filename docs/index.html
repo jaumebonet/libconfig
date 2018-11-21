@@ -4,16 +4,15 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>libconfig: global config variables for libraries &#8212; libconfig 0.6.5 documentation</title>
+    <title>libconfig: global config variables for libraries &#8212; libconfig 0.6.7 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/style.css" type="text/css" />
-    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/style.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="_static/functions.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
@@ -39,7 +38,7 @@
         </button>
         <a class="navbar-brand" href="#">
           libconfig</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.6.5</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.6.7</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -148,20 +147,25 @@ values of your library. As an example, a minimized vertion of the configuration 
 </pre></div>
 </div>
 <p>This ends up loading a starting set of options:</p>
-<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [4]: </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [2]: </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
 <span class="gp">   ...: </span><span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;display.width&#39;</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
 <span class="gp">   ...: </span><span class="n">show_options</span><span class="p">()</span>
 <span class="gp">   ...: </span>
-<span class="gh">Out[6]: </span><span class="go"></span>
+<span class="gh">Out[2]: </span><span class="go"></span>
 <span class="go">  primary-key secondary-key  value      type default locked                               description values</span>
-<span class="go">0  system      overwrite     False  bool      False   False  Allow overwriting already existing files  None </span>
-<span class="go">1  system      output        ./     path_out  ./      False  Default folder to output generated files  None </span>
-<span class="go">2  system      cpu           3      int       3       False  Available CPU for multiprocessing         None </span>
+<span class="go">0  opt         one           1      int       1       False  option 1                                  None </span>
+<span class="go">1  opt         two           2      int       2       False  option 2                                  None </span>
+<span class="go">2  system      overwrite     False  bool      False   False  Allow overwriting already existing files  None </span>
+<span class="go">3  system      output        ./     path_out  ./      False  Default folder to output generated files  None </span>
+<span class="go">4  system      cpu           3      int       3       False  Available CPU for multiprocessing         None </span>
 </pre></div>
 </div>
 <p>And exposing only to the rest of the library (and maybe to the user) the functions to modify those options
 in a controlled manner by taking out <a class="reference internal" href="generated/libconfig.register_option.html#libconfig.register_option" title="libconfig.register_option"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_option()</span></code></a> and <a class="reference internal" href="generated/libconfig.reset_options.html#libconfig.reset_options" title="libconfig.reset_options"><code class="xref py py-func docutils literal notranslate"><span class="pre">reset_options()</span></code></a> from the global view.</p>
-<p>A list of all the available functions can be found in the <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/api.html#api" title="(in pandas v0.22.0)"><span class="xref std std-ref">API</span></a>.</p>
+<p>One can also make the target library able to be configured through a file defining the values of the registered
+options. Through <a class="reference internal" href="generated/libconfig.get_local_config_file.html#libconfig.get_local_config_file" title="libconfig.get_local_config_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_local_config_file()</span></code></a>, the library will search for a config file in the current working
+directory, the repo root or the user’s home, allowing for different levels of specific configuration.</p>
+<p>A list of all the available functions can be found in the <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/api.html#api" title="(in pandas v0.23.4)"><span class="xref std std-ref">API</span></a>.</p>
 <div class="toctree-wrapper compound">
 </div>
 </div>
@@ -184,7 +188,7 @@ in a controlled manner by taking out <a class="reference internal" href="generat
     </p>
     <p>
         &copy; Copyright 2018, Jaume Bonet.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.2.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.<br/>
     </p>
   </div>
 </footer>

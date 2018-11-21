@@ -472,7 +472,7 @@ def get_local_config_file(filename):
 
     1. **Local:** Configuration file found in the current working directory.
     2. **Project:** Configuration file found in the root of the current
-        working ``git`` repository.
+       working ``git`` repository.
     3. **User:** Configuration file found in the user's ``$HOME``.
 
     :param str filename: Raw name of the configuration file.

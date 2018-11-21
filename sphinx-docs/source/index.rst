@@ -63,6 +63,10 @@ This ends up loading a starting set of options:
 And exposing only to the rest of the library (and maybe to the user) the functions to modify those options
 in a controlled manner by taking out :func:`.register_option` and :func:`.reset_options` from the global view.
 
+One can also make the target library able to be configured through a file defining the values of the registered
+options. Through :func:`.get_local_config_file`, the library will search for a config file in the current working
+directory, the repo root or the user's home, allowing for different levels of specific configuration.
+
 A list of all the available functions can be found in the :ref:`API <api>`.
 
 .. toctree::
