@@ -12,7 +12,6 @@
 # -*-
 import json
 import os
-from subprocess import run, PIPE
 
 import pandas as pd
 import yaml
@@ -20,6 +19,11 @@ import six
 
 import libconfig.evaluator as ev
 import libconfig.util as util
+
+if six.PY2:
+    from subprocess import check_output, CalledProcessError
+else:
+    from subprocess import run, PIPE
 
 
 pd.set_option('display.max_colwidth', -1)
@@ -57,6 +61,18 @@ def _options_to_dict():
         dc.setdefault(x[0], {})
         dc[x[0]][x[1]] = x[2]
     return dc
+
+
+def _get_repo():
+    command = ['git', 'rev-parse', '--show-toplevel']
+    if six.PY2:
+        try:
+            return check_output(command) .decode('utf-8').strip()
+        except CalledProcessError:
+            return ''
+    else:
+        return (run(command, stdout=PIPE, stderr=PIPE)
+                .stdout.decode('utf-8').strip())
 
 
 @util.lower_keynames
@@ -470,9 +486,7 @@ def get_local_config_file(filename):
     else:
         try:
             # Project. If not in a git repo, this will not exist.
-            config_repo = run(['git', 'rev-parse', '--show-toplevel'],
-                              stdout=PIPE,
-                              stderr=PIPE).stdout.decode('utf-8').strip()
+            config_repo = _get_repo()
             if len(config_repo) == 0:
                 raise Exception()
             config_repo = os.path.join(config_repo, filename)
