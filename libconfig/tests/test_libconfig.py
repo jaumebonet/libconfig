@@ -3,7 +3,7 @@
 # @Email:  jaume.bonet@gmail.com
 # @Filename: test_libconfig.py
 # @Last modified by:   bonet
-# @Last modified time: 10-Apr-2018
+# @Last modified time: 21-Nov-2018
 
 
 import os
@@ -25,23 +25,34 @@ class TestLibConfig(object):
         """
         cfg.register_option("numeric", "integer_fixed", 4, "int",
                             "this is a fixed integer", locked=True)
+        assert cfg.get_option("numeric", "integer_fixed") == 4
         cfg.register_option("numeric", "float_free", 2.3, "float",
                             "this is a free float")
+        assert cfg.get_option("numeric", "float_free") == 2.3
         with pytest.raises(KeyError):
             cfg.register_option("numeric", "integer_fixed", 2, "int",
                                 "cannot overwrite a register!")
 
         cfg.register_option("boolean", "boolean", False, "bool",
                             "this is a simple boolean.")
+        assert not cfg.get_option("boolean", "boolean")
 
         cfg.register_option("string", "option_text", "alpha", "text",
                             "this string is limited to some options.",
                             values=["alpha", "beta", "gamma"])
+        assert cfg.get_option("string", "option_text") == "alpha"
         cfg.register_option("string", "free_text", "omega", "string",
                             "this string can be anything.", values=False)
+        assert cfg.get_option("string", "free_text") == "omega"
 
         cfg.register_option("path", "in", os.path.expanduser('~'), "path_in",
                             "this path needs to exist.")
+        assert cfg.get_option("path", "in") == os.path.expanduser('~')
+        cfg.register_option("path", "inNone", None, "path_in",
+                            "this sets a default non-defined path.")
+        with pytest.raises(ValueError):
+            # which rises error if trying to access it.
+            cfg.get_option("path", "inNone")
         with pytest.raises(ValueError):
             cfg.register_option("path", "in2", "/no/path/at/all", "path_in",
                                 "it will fail if it doesn't.")
@@ -49,6 +60,7 @@ class TestLibConfig(object):
             cfg.set_option("path", "in2")  # and it won't be registered
         cfg.register_option("path", "out", "/no/path/at/all", "path_out",
                             "this path does not need to exist.")
+        assert cfg.get_option("path", "out") == "/no/path/at/all"
 
         with pytest.raises(KeyError):
             cfg.register_option("wrong", "type", "won't work", "wrongtype",
@@ -140,16 +152,69 @@ class TestLibConfig(object):
             'limited to some options.',
             '  **string**      **free_text**  this string can be anything.',
             '    **path**             **in**  this path needs to exist.',
+            '    **path**         **innone**  this sets a default '
+            'non-defined path.',
             '    **path**            **out**  this path does not '
             'need to exist.',
             '============  =================  ==========='
         ]
         assert cfg.document_options() == "\n".join(data)
 
+    def test_default_config_file_and_with(self):
+        """
+        See if we can properly pick the default.
+        """
+        of = '.test.libconfig.cfg'
+        of_local = os.path.join(os.getcwd(), of)
+        of_project = os.path.join('..', '..', of)
+        of_user = os.path.join(os.path.expanduser('~'), of)
+
+        cfg.set_option("string", "option_text", "beta")
+        cfg.set_option("string", "free_text", "general")
+
+        with cfg.on_option_value('string', 'free_text', 'local',
+                                 'string', 'option_text', 'alpha'):
+            cfg.write_options_to_file(of_local, 'yaml')
+        assert cfg.get_option("string", "option_text") == "beta"
+        assert cfg.get_option("string", "free_text") == "general"
+
+        with cfg.on_option_value('string', 'free_text', 'project'):
+            cfg.write_options_to_file(of_project, 'json')
+        assert cfg.get_option("string", "free_text") == "general"
+
+        with cfg.on_option_value('string', 'free_text', 'user'):
+            cfg.write_options_to_file(of_user)
+        assert cfg.get_option("string", "free_text") == "general"
+
+        of_select = cfg.get_local_config_file(of)
+        assert os.path.abspath(of_select) == os.path.abspath(of_local)
+        cfg.set_options_from_file(of_select, 'yaml')
+        assert cfg.get_option("string", "option_text") == "alpha"
+        assert cfg.get_option("string", "free_text") == "local"
+        os.unlink(of_select)
+
+        of_select = cfg.get_local_config_file(of)
+        assert os.path.abspath(of_select) == os.path.abspath(of_project)
+        cfg.set_options_from_file(of_select, 'json')
+        assert cfg.get_option("string", "option_text") == "beta"
+        assert cfg.get_option("string", "free_text") == "project"
+        os.unlink(of_select)
+
+        of_select = cfg.get_local_config_file(of)
+        assert os.path.abspath(of_select) == os.path.abspath(of_user)
+        cfg.set_options_from_file(of_select)
+        assert cfg.get_option("string", "option_text") == "beta"
+        assert cfg.get_option("string", "free_text") == "user"
+        os.unlink(of_select)
+
+        of_select = cfg.get_local_config_file(of)
+        assert of_select is None
+
     def test_resets(self):
         """
         See if we can get back the original values.
         """
+        cfg.set_option("string", "option_text", "beta")
         assert cfg.get_option("string", "option_text") == "beta"
         assert cfg.get_option("string", "option_text") != "alpha"
         cfg.reset_option("string", "option_text")

@@ -7,7 +7,7 @@
 # @url:    jaumebonet.cat
 #
 # @date:   2017-10-03 15:19:32
-# @Last modified time: 09-Apr-2018
+# @Last modified time: 21-Nov-2018
 #
 # -*-
 import os
@@ -17,9 +17,10 @@ __all__ = ["value_eval", "cast"]
 
 
 def is_path(value):
-    if not os.path.isfile(value) and not os.path.isdir(value):
-        msg = "Value must be an instance of {type_repr}"
-        raise ValueError(msg.format(type_repr="path"))
+    if value is not None:
+        if not os.path.isfile(value) and not os.path.isdir(value):
+            msg = "Value must be an instance of {type_repr}"
+            raise ValueError(msg.format(type_repr="path"))
 
 
 _TYPES = {

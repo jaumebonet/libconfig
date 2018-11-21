@@ -7,7 +7,7 @@
 # @url:    jaumebonet.cat
 #
 # @date:   2017-10-03 14:59:01
-# @Last modified time: 10-Apr-2018
+# @Last modified time: 21-Nov-2018
 #
 # -*-
 import json
@@ -20,17 +20,24 @@ import six
 import libconfig.evaluator as ev
 import libconfig.util as util
 
+if six.PY2:
+    from subprocess import check_output, CalledProcessError
+else:
+    from subprocess import run, PIPE
+
 
 pd.set_option('display.max_colwidth', -1)
 
 
 __all__ = ["register_option", "reset_option", "reset_options", "set_option",
-           "set_options_from_dict", "set_options_from_JSON",
-           "set_options_from_YAML", "get_option", "get_option_default",
-           "get_option_description", "write_options_to_JSON",
-           "write_options_to_YAML", "show_options", "lock_option",
-           "check_option", "get_option_alternatives",
-           "document_options"]
+           "set_options_from_dict", "set_options_from_file",
+           "set_options_from_JSON", "set_options_from_YAML", "get_option",
+           "get_option_default", "get_option_description",
+           "write_options_to_file", "write_options_to_JSON",
+           "write_options_to_YAML", "show_options",
+           "lock_option", "check_option", "get_option_alternatives",
+           "document_options", "on_option_value",
+           "get_local_config_file"]
 
 
 _columns = ["primary-key", "secondary-key", "value", "type",
@@ -56,29 +63,36 @@ def _options_to_dict():
     return dc
 
 
-@util.entry_must_not_exist
+def _get_repo():
+    command = ['git', 'rev-parse', '--show-toplevel']
+    if six.PY2:
+        try:
+            return check_output(command) .decode('utf-8').strip()
+        except CalledProcessError:
+            return ''
+    else:
+        return (run(command, stdout=PIPE, stderr=PIPE)
+                .stdout.decode('utf-8').strip())
+
+
 @util.lower_keynames
+@util.entry_must_not_exist
 def register_option(key, subkey, default, _type, definition,
                     values=None, locked=False):
-    """
-    Create a new option.
+    """Create a new option.
 
-    :param key: First identifier of the option.
-    :type key: :class:`str`
-    :param subkey: Second identifier of the option.
-    :type subkey: :class:`str`
+    :param str key: First identifier of the option.
+    :param str subkey: Second identifier of the option.
     :param default: Default value of the option. Type varies and it is
         described by ``_type``.
-    :param _type: Type of the value of the option. Available options are:
+    :param str _type: Type of the value of the option. Available options are:
         [``int``, ``float``, ``bool``, ``text``, ``string``,
         ``path_in``, ``path_out``].
-    :type _type: :class:`str`
-    :param definition: Brief explanation of the option.
+    :param str definition: Brief explanation of the option.
     :type definition: :class:`str`
-    :param list values: Available values for the option.
+    :param values: Available values for the option.
     :type values: :func:`list` of accepted ``_type``
-    :param locked: If True, option cannot be altered.
-    :type locked: :class:`bool`
+    :param bool locked: If True, option cannot be altered.
 
     :raise:
         :KeyError: If ``key`` or ``subkey`` already define an option.
@@ -93,41 +107,44 @@ def register_option(key, subkey, default, _type, definition,
     _global_config = _global_config.append(new_opt, ignore_index=True)
 
 
-@util.entry_must_exist
 @util.lower_keynames
-def get_option(key, subkey):
-    """
-    Get the current value of the option.
+@util.entry_must_exist
+def get_option(key, subkey, in_path_none=False):
+    """Get the current value of the option.
 
-    :param key: First identifier of the option.
-    :type key: :class:`str`
-    :param subkey: Second identifier of the option.
-    :type subkey: :class:`str`
+    :param str key: First identifier of the option.
+    :param str subkey: Second identifier of the option.
+    :param bool in_path_none: Allows for ``in_path`` values of
+        :data:`None` to be retrieved.
 
     :return: Current value of the option (type varies).
 
     :raise:
         :KeyError: If ``key`` or ``subkey`` do not define any option.
+        :ValueError: If a ``in_path`` type with :data:`None` value is
+            requested.
     """
     df = _get_df(key, subkey)
     if df["type"].values[0] == "bool":
         return bool(df["value"].values[0])
     elif df["type"].values[0] == "int":
         return int(df["value"].values[0])
+    elif df["type"].values[0] == "path_in":
+        if df["value"].values[0] is None and not in_path_none:
+            raise ValueError('Unspecified path for {0}.{1}'.format(key,
+                                                                   subkey))
+        return df["value"].values[0]
     else:
         return df["value"].values[0]
 
 
-@util.entry_must_exist
 @util.lower_keynames
+@util.entry_must_exist
 def get_option_default(key, subkey):
-    """
-    Get the default value of the option.
+    """Get the default value of the option.
 
-    :param key: First identifier of the option.
-    :type key: :class:`str`
-    :param subkey: Second identifier of the option.
-    :type subkey: :class:`str`
+    :param str key: First identifier of the option.
+    :param str subkey: Second identifier of the option.
 
     :return: Default value of the option (type varies).
 
@@ -143,16 +160,13 @@ def get_option_default(key, subkey):
         return df["default"].values[0]
 
 
-@util.entry_must_exist
 @util.lower_keynames
+@util.entry_must_exist
 def get_option_description(key, subkey):
-    """
-    Get the string descriving a particular option.
+    """Get the string descriving a particular option.
 
-    :param key: First identifier of the option.
-    :type key: :class:`str`
-    :param subkey: Second identifier of the option.
-    :type subkey: :class:`str`
+    :param str key: First identifier of the option.
+    :param str subkey: Second identifier of the option.
 
     :return: :class:`str` - description of the option.
 
@@ -162,16 +176,13 @@ def get_option_description(key, subkey):
     return _get_df(key, subkey)["description"].values[0]
 
 
-@util.entry_must_exist
 @util.lower_keynames
+@util.entry_must_exist
 def get_option_alternatives(key, subkey):
-    """
-    Get list of available values for an option.
+    """Get list of available values for an option.
 
-    :param key: First identifier of the option.
-    :type key: :class:`str`
-    :param subkey: Second identifier of the option.
-    :type subkey: :class:`str`
+    :param str key: First identifier of the option.
+    :param str subkey: Second identifier of the option.
 
     :return: Union[:func:`list`, :data:`None`] - alternative values
         for the option, if any specified (otherwise, is open).
@@ -182,16 +193,13 @@ def get_option_alternatives(key, subkey):
     return _get_df(key, subkey)["values"].values[0]
 
 
-@util.entry_must_exist
 @util.lower_keynames
+@util.entry_must_exist
 def set_option(key, subkey, value):
-    """
-    Sets the value of an option.
+    """Sets the value of an option.
 
-    :param key: First identifier of the option.
-    :type key: :class:`str`
-    :param subkey: Second identifier of the option.
-    :type subkey: :class:`str`
+    :param str key: First identifier of the option.
+    :param str subkey: Second identifier of the option.
     :param value: New value for the option (type varies).
 
     :raise:
@@ -216,19 +224,16 @@ def set_option(key, subkey, value):
         (_global_config["secondary-key"] == subkey), "value"] = value
 
 
-@util.entry_must_exist
 @util.lower_keynames
+@util.entry_must_exist
 def check_option(key, subkey, value):
-    """
-    Evaluate if a given value fits the option.
+    """Evaluate if a given value fits the option.
 
     If an option has a limited set of available values, check if the provided
     value is amongst them.
 
-    :param key: First identifier of the option.
-    :type key: :class:`str`
-    :param subkey: Second identifier of the option.
-    :type subkey: :class:`str`
+    :param str key: First identifier of the option.
+    :param str subkey: Second identifier of the option.
     :param value: Value to test (type varies).
 
     :return: :class:`bool` - does ``value`` belong to the options?
@@ -245,16 +250,13 @@ def check_option(key, subkey, value):
     return True
 
 
-@util.entry_must_exist
 @util.lower_keynames
+@util.entry_must_exist
 def reset_option(key, subkey):
-    """
-    Resets a single option to the default values.
+    """Resets a single option to the default values.
 
-    :param key: First identifier of the option.
-    :type key: :class:`str`
-    :param subkey: Second identifier of the option.
-    :type subkey: :class:`str`
+    :param str key: First identifier of the option.
+    :param str subkey: Second identifier of the option.
 
     :raise:
         :KeyError: If ``key`` or ``subkey`` do not define any option.
@@ -270,16 +272,13 @@ def reset_option(key, subkey):
         (_global_config["secondary-key"] == subkey), "value"] = val
 
 
-@util.entry_must_exist
 @util.lower_keynames
+@util.entry_must_exist
 def lock_option(key, subkey):
-    """
-    Make an option unmutable.
+    """Make an option unmutable.
 
-    :param key: First identifier of the option.
-    :type key: :class:`str`
-    :param subkey: Second identifier of the option.
-    :type subkey: :class:`str`
+    :param str key: First identifier of the option.
+    :param str subkey: Second identifier of the option.
 
     :raise:
         :KeyError: If ``key`` or ``subkey`` do not define any option.
@@ -292,15 +291,13 @@ def lock_option(key, subkey):
 
 @util.lower_keynames
 def show_options(key=""):
-    """
-    Returns a copy the options :class:`~pandas.DataFrame`.
+    """Returns a copy the options :class:`~pandas.DataFrame`.
 
     Called on jupyter notebook, it will print them in pretty
     :class:`~pandas.DataFrame` format.
 
-    :param key: First identifier of the option. If not provided,
+    :param str key: First identifier of the option. If not provided,
         all options are returned.
-    :type key: :class:`str`
 
     :return: :class:`~pandas.DataFrame`
     """
@@ -311,12 +308,10 @@ def show_options(key=""):
 
 
 def reset_options(empty=True):
-    """
-    Empty ALL options.
+    """Empty ALL options.
 
-    :param empty: When :data:`True`, completelly removes all options; when
-        :data:`False`, sets them back to its original value.
-    :type empty: :class:`bool`
+    :param bool empty: When :data:`True`, completelly removes all options;
+        when :data:`False`, sets them back to its original value.
 
     This function skips ``locked`` control.
     """
@@ -329,11 +324,9 @@ def reset_options(empty=True):
 
 
 def set_options_from_YAML(filename):
-    """
-    Load options from a YAML-formated file.
+    """Load options from a YAML-formated file.
 
-    :param filename: File from which to load the options.
-    :type filename: :class:`str`
+    :param str filename: File from which to load the options.
 
     :raise:
         :IOError: If ``filename`` does not exist.
@@ -346,11 +339,9 @@ def set_options_from_YAML(filename):
 
 
 def set_options_from_JSON(filename):
-    """
-    Load options from a YAML-formated file.
+    """Load options from a YAML-formated file.
 
-    :param filename: File from which to load the options.
-    :type filename: :class:`str`
+    :param str filename: File from which to load the options.
 
     :raise:
         :IOError: If ``filename`` does not exist.
@@ -362,12 +353,30 @@ def set_options_from_JSON(filename):
     set_options_from_dict(data_dict)
 
 
-def set_options_from_dict(data_dict):
-    """
-    Load options from a dictionary.
+def set_options_from_file(filename, format='yaml'):
+    """Load options from file.
 
-    :param data_dict: Dictionary with the options to load.
-    :type data_dict: :class:`dict`
+    This is a wrapper over :func:`.set_options_from_JSON` and
+    :func:`.set_options_from_YAML`.
+
+    :param str filename: File from which to load the options.
+    :param str format: File format (``yaml`` or ``json``).
+
+    :raises:
+        :ValueError: If an unknown ``format`` is requested.
+    """
+    if format.lower() == 'yaml':
+        return set_options_from_YAML(filename)
+    elif format.lower() == 'json':
+        return set_options_from_JSON(filename)
+    else:
+        raise ValueError('Unknown format {}'.format(format))
+
+
+def set_options_from_dict(data_dict):
+    """Load options from a dictionary.
+
+    :param dict data_dict: Dictionary with the options to load.
     """
     for k in data_dict:
         if not isinstance(data_dict[k], dict):
@@ -377,19 +386,37 @@ def set_options_from_dict(data_dict):
                 data_dict[k][sk] = str(data_dict[k][sk])
             _type = _get_df(k, sk)[["type"]].values[0]
             data_dict[k][sk] = ev.cast(data_dict[k][sk], _type)
-            if get_option(k, sk) != data_dict[k][sk]:
+            if get_option(k, sk, True) != data_dict[k][sk]:
                 try:
                     set_option(k, sk, data_dict[k][sk])
                 except ValueError:
                     pass  # locked options will not be changed
 
 
-def write_options_to_YAML(filename):
-    """
-    Writes the options in YAML format to a file.
+def write_options_to_file(filename, format='yaml'):
+    """Write options to file.
 
-    :param filename: Target file to write the options.
-    :type filename: :class:`str`
+    This is a wrapper over :func:`.write_options_to_JSON` and
+    :func:`.write_options_to_YAML`.
+
+    :param str filename: Target file to write the options.
+    :param str format: File format (``yaml`` or ``json``).
+
+    :raises:
+        :ValueError: If an unknown ``format`` is requested.
+    """
+    if format.lower() == 'yaml':
+        write_options_to_YAML(filename)
+    elif format.lower() == 'json':
+        write_options_to_JSON(filename)
+    else:
+        raise ValueError('Unknown format {}'.format(format))
+
+
+def write_options_to_YAML(filename):
+    """Writes the options in YAML format to a file.
+
+    :param str filename: Target file to write the options.
     """
     fd = open(filename, "w")
     yaml.dump(_options_to_dict(), fd, default_flow_style=False)
@@ -397,11 +424,9 @@ def write_options_to_YAML(filename):
 
 
 def write_options_to_JSON(filename):
-    """
-    Writes the options in JSON format to a file.
+    """Writes the options in JSON format to a file.
 
-    :param filename: Target file to write the options.
-    :type filename: :class:`str`
+    :param str filename: Target file to write the options.
     """
     fd = open(filename, "w")
     fd.write(json.dumps(_options_to_dict(), indent=2, separators=(',', ': ')))
@@ -409,8 +434,7 @@ def write_options_to_JSON(filename):
 
 
 def document_options():
-    """
-    Generates a docstring table to add to the library documentation
+    """Generates a docstring table to add to the library documentation.
 
     :return: :class:`str`
     """
@@ -437,3 +461,89 @@ def document_options():
     data.append(separators)
 
     return "\n".join(data)
+
+
+def get_local_config_file(filename):
+    """Find local file to setup default values.
+
+    There is a pre-fixed logic on how the search of the configuration
+    file is performed. If the highes priority configuration file is found,
+    there is no need to search for the next. From highest to lowest priority:
+
+    1. **Local:** Configuration file found in the current working directory.
+    2. **Project:** Configuration file found in the root of the current
+        working ``git`` repository.
+    3. **User:** Configuration file found in the user's ``$HOME``.
+
+    :param str filename: Raw name of the configuration file.
+
+    :return: Union[:class:`.str`, :data:`None`] - Configuration file with
+        the highest priority, :data:`None` if no config file is found.
+    """
+    if os.path.isfile(filename):
+        # Local has priority
+        return filename
+    else:
+        try:
+            # Project. If not in a git repo, this will not exist.
+            config_repo = _get_repo()
+            if len(config_repo) == 0:
+                raise Exception()
+            config_repo = os.path.join(config_repo, filename)
+            if os.path.isfile(config_repo):
+                return config_repo
+            else:
+                raise Exception()
+        except Exception:
+            config_home = os.path.join(os.getenv("HOME",
+                                                 os.path.expanduser("~")),
+                                       filename)
+            if os.path.isfile(config_home):
+                return config_home
+    return None
+
+
+class on_option_value(object):
+    """Temporarily change the configuration values.
+
+    :raises:
+        :ValueError: If the number of parameters cannot be casted into
+            one or multiple options.
+
+    .. ipython::
+
+        In [1]: import libconfig as cfg
+           ...: cfg.register_option('opt', 'one', 1, 'int', 'option 1')
+           ...: cfg.register_option('opt', 'two', 2, 'int', 'option 2')
+           ...: print(cfg.get_option('opt', 'one'))
+           ...: with cfg.on_option_value('opt', 'one', 10):
+           ...:     print(cfg.get_option('opt', 'one'))
+           ...: print(cfg.get_option('opt', 'one'))
+           ...: print(cfg.get_option('opt', 'two'))
+           ...: with cfg.on_option_value('opt', 'one', 10, 'opt', 'two', 20):
+           ...:     print(cfg.get_option('opt', 'one'))
+           ...:     print(cfg.get_option('opt', 'two'))
+           ...: print(cfg.get_option('opt', 'one'))
+           ...: print(cfg.get_option('opt', 'two'))
+    """
+
+    def __init__(self, *args):
+        def chunks(l, n):
+            for i in range(0, len(l), n):
+                yield l[i:i + n]
+
+        if not (len(args) % 3 == 0 and len(args) >= 3):
+            raise ValueError('option values are defined in 3s.')
+
+        self.values = pd.DataFrame(chunks(args, 3),
+                                   columns=['k1', 'k2', 'new_value'])
+        self.values['old_value'] = \
+            [get_option(l['k1'], l['k2']) for _, l in self.values.iterrows()]
+
+    def __enter__(self):
+        for i, l in self.values.iterrows():
+            set_option(l['k1'], l['k2'], l['new_value'])
+
+    def __exit__(self, *args):
+        for i, l in self.values.iterrows():
+            set_option(l['k1'], l['k2'], l['old_value'])

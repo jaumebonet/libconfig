@@ -23,9 +23,12 @@ Functions
    ~reset_option
    ~reset_options
    ~set_option
+   ~set_options_from_file
    ~set_options_from_JSON
    ~set_options_from_YAML
    ~set_options_from_dict
    ~show_options
    ~write_options_to_JSON
    ~write_options_to_YAML
+   ~get_local_config_file
+   ~on_option_value
