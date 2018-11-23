@@ -15,10 +15,13 @@ Functions
 
    ~check_option
    ~document_options
+   ~get_local_config_file
    ~get_option
    ~get_option_default
    ~get_option_description
+   ~ifndef
    ~lock_option
+   ~on_option_value
    ~register_option
    ~reset_option
    ~reset_options
@@ -28,7 +31,6 @@ Functions
    ~set_options_from_YAML
    ~set_options_from_dict
    ~show_options
+   ~unregister_option
    ~write_options_to_JSON
    ~write_options_to_YAML
-   ~get_local_config_file
-   ~on_option_value
