@@ -73,6 +73,7 @@
 <li><a class="reference internal" href="#">libconfig: global config variables for libraries</a><ul>
 <li><a class="reference internal" href="#install">Install</a></li>
 <li><a class="reference internal" href="#basic-example">Basic Example</a></li>
+<li><a class="reference internal" href="#errors">Errors</a></li>
 </ul>
 </li>
 </ul>
@@ -120,29 +121,26 @@ to manage global configuration variables in your own python libraries.</p>
 <div class="section" id="basic-example">
 <h2>Basic Example<a class="headerlink" href="#basic-example" title="Permalink to this headline">¶</a></h2>
 <p>The most expected way to use the library is by creating a <code class="docutils literal notranslate"><span class="pre">core</span></code> file in your library in which to setup the global
-values of your library. As an example, a minimized vertion of the configuration of the
+values of your library. As an example, a minimized version of the configuration of the
 <a class="reference external" href="https://github.com/jaumebonet/RosettaSilentToolbox">RosettaSilentToolbox</a> looks like this:</p>
 <div class="highlight-ipython notranslate"><div class="highlight"><pre><span></span><span class="gp">In [1]: </span><span class="kn">import</span> <span class="nn">multiprocessing</span>
 <span class="gp">   ...: </span>
 <span class="gp">   ...: </span><span class="kn">from</span> <span class="nn">libconfig</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="gp">   ...: </span>
-<span class="gp">   ...: </span><span class="k">try</span><span class="p">:</span>
+<span class="gp">   ...: </span><span class="k">with</span> <span class="n">ifndef</span><span class="p">():</span>
+<span class="gp">   ...: </span>  <span class="c1"># This avoids recalling this every time, as register_option will raise an error when</span>
+<span class="gp">   ...: </span>  <span class="c1"># trying to re-register. Basically, this is the equivalent to Cpp&#39;s #IFDEF</span>
+<span class="gp">   ...: </span>
 <span class="gp">   ...: </span>  <span class="c1"># Register IO control options</span>
 <span class="gp">   ...: </span>  <span class="n">register_option</span><span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;overwrite&quot;</span><span class="p">,</span>  <span class="bp">False</span><span class="p">,</span> <span class="s2">&quot;bool&quot;</span><span class="p">,</span> <span class="s2">&quot;Allow overwriting already existing files&quot;</span><span class="p">)</span>
 <span class="gp">   ...: </span>  <span class="n">register_option</span><span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;output&quot;</span><span class="p">,</span> <span class="s2">&quot;./&quot;</span><span class="p">,</span> <span class="s2">&quot;path_out&quot;</span><span class="p">,</span> <span class="s2">&quot;Default folder to output generated files&quot;</span><span class="p">)</span>
 <span class="gp">   ...: </span>  <span class="n">register_option</span><span class="p">(</span><span class="s2">&quot;system&quot;</span><span class="p">,</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">,</span> <span class="s2">&quot;Available CPU for multiprocessing&quot;</span><span class="p">)</span>
 <span class="gp">   ...: </span>
-<span class="gp">   ...: </span>  <span class="c1"># Finally, register_option and reset_option are taken out from the global view so that</span>
-<span class="gp">   ...: </span>  <span class="c1"># they are not imported with the rest of the functions. This way the user can not access</span>
-<span class="gp">   ...: </span>  <span class="c1"># to them when importing the library and has to work through the rest of the available</span>
-<span class="gp">   ...: </span>  <span class="c1"># functions.</span>
-<span class="gp">   ...: </span>  <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;register_option&quot;</span><span class="p">,</span> <span class="s2">&quot;reset_options&quot;</span><span class="p">]:</span>
-<span class="gp">   ...: </span>    <span class="k">del</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">name</span><span class="p">]</span>
-<span class="gp">   ...: </span>
-<span class="gp">   ...: </span><span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-<span class="gp">   ...: </span>  <span class="c1"># This avoids recalling this every time, as register_option will raise an error when</span>
-<span class="gp">   ...: </span>  <span class="c1"># trying to re-register. Basically, this is the equivalent to Cpp&#39;s #IFDEF</span>
-<span class="gp">   ...: </span>  <span class="k">pass</span>
+<span class="gp">   ...: </span><span class="c1"># Finally, register_option, unregister_option and reset_option are taken out from the global view</span>
+<span class="gp">   ...: </span><span class="c1"># so that they are not imported with the rest of the functions. This way the user can not access</span>
+<span class="gp">   ...: </span><span class="c1"># them when importing the library and has to work through the rest of the available functions.</span>
+<span class="gp">   ...: </span><span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">user_forbidden</span><span class="p">:</span>
+<span class="gp">   ...: </span>  <span class="k">del</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">name</span><span class="p">]</span>
 <span class="gp">   ...: </span>
 </pre></div>
 </div>
@@ -153,11 +151,9 @@ values of your library. As an example, a minimized vertion of the configuration 
 <span class="gp">   ...: </span>
 <span class="gh">Out[2]: </span><span class="go"></span>
 <span class="go">  primary-key secondary-key  value      type default locked                               description values</span>
-<span class="go">0  opt         one           1      int       1       False  option 1                                  None </span>
-<span class="go">1  opt         two           2      int       2       False  option 2                                  None </span>
-<span class="go">2  system      overwrite     False  bool      False   False  Allow overwriting already existing files  None </span>
-<span class="go">3  system      output        ./     path_out  ./      False  Default folder to output generated files  None </span>
-<span class="go">4  system      cpu           3      int       3       False  Available CPU for multiprocessing         None </span>
+<span class="go">0  system      overwrite     False  bool      False   False  Allow overwriting already existing files  None </span>
+<span class="go">1  system      output        ./     path_out  ./      False  Default folder to output generated files  None </span>
+<span class="go">2  system      cpu           3      int       3       False  Available CPU for multiprocessing         None </span>
 </pre></div>
 </div>
 <p>And exposing only to the rest of the library (and maybe to the user) the functions to modify those options
@@ -165,6 +161,14 @@ in a controlled manner by taking out <a class="reference internal" href="generat
 <p>One can also make the target library able to be configured through a file defining the values of the registered
 options. Through <a class="reference internal" href="generated/libconfig.get_local_config_file.html#libconfig.get_local_config_file" title="libconfig.get_local_config_file"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_local_config_file()</span></code></a>, the library will search for a config file in the current working
 directory, the repo root or the user’s home, allowing for different levels of specific configuration.</p>
+</div>
+<div class="section" id="errors">
+<h2>Errors<a class="headerlink" href="#errors" title="Permalink to this headline">¶</a></h2>
+<p>The library defines two specific errors:</p>
+<ul class="simple">
+<li><strong>AlreadyRegisteredError:</strong> When trying to register an already registered option</li>
+<li><strong>NotRegisteredError:</strong> When trying to access a non-registered option.</li>
+</ul>
 <p>A list of all the available functions can be found in the <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/api.html#api" title="(in pandas v0.23.4)"><span class="xref std std-ref">API</span></a>.</p>
 <div class="toctree-wrapper compound">
 </div>

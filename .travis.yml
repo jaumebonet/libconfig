@@ -23,13 +23,17 @@ matrix:
     - python: 3.7-dev
       env: TOXENV=py37
       os: linux
+    - language: generic
+      env: TOXENV=py27
+      os: osx
+    - language: generic
+      env: TOXENV=py36
+      os: osx
 
+before_install:
+- bash ./ci/travis_before_install.sh
 install:
-  - pip install tox
-  - if [[ $TOXENV == py36 ]]; then pip install pyyaml; fi
-  - if [[ $TOXENV == py36 ]]; then pip install coveralls; fi
-  - if [[ $TOXENV == py36 ]]; then pip install python-coveralls; fi
-  - if [[ $TOXENV == py36 ]]; then pip install codacy-coverage; fi
+  - bash ./ci/travis_install.sh
 
 script:
   - tox

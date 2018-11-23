@@ -3,13 +3,14 @@
 # @Email:  jaume.bonet@gmail.com
 # @Filename: util.py
 # @Last modified by:   bonet
-# @Last modified time: 21-Nov-2018
+# @Last modified time: 23-Nov-2018
 
 
 from functools import wraps
 
 
-__all__ = ["lower_keynames", "entry_must_exist", "entry_must_not_exist"]
+__all__ = ["lower_keynames", "entry_must_exist", "entry_must_not_exist",
+           "AlreadyRegisteredError", "NotRegisteredError"]
 
 
 def lower_keynames(func):
@@ -49,7 +50,8 @@ def entry_must_exist(func):
         count = cfg[(cfg['primary-key'] == k1) &
                     (cfg['secondary-key'] == k2)].shape[0]
         if count == 0:
-            raise KeyError("Option {0}.{1} not registered".format(k1, k2))
+            raise NotRegisteredError(
+                "Option {0}.{1} not registered".format(k1, k2))
         return func(*args, **kwargs)
     return wrapper
 
@@ -69,6 +71,19 @@ def entry_must_not_exist(func):
         count = cfg[(cfg['primary-key'] == k1) &
                     (cfg['secondary-key'] == k2)].shape[0]
         if count > 0:
-            raise KeyError("Option {0}.{1} already registered".format(k1, k2))
+            raise AlreadyRegisteredError(
+                "Option {0}.{1} already registered".format(k1, k2))
         return func(*args, **kwargs)
     return wrapper
+
+
+class AlreadyRegisteredError(Exception):
+    """
+    """
+    pass
+
+
+class NotRegisteredError(Exception):
+    """
+    """
+    pass

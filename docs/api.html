@@ -120,56 +120,62 @@
 <tr class="row-even"><td><a class="reference internal" href="generated/libconfig.document_options.html#libconfig.document_options" title="libconfig.document_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">document_options</span></code></a>()</td>
 <td>Generates a docstring table to add to the library documentation.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.get_option.html#libconfig.get_option" title="libconfig.get_option"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_option</span></code></a>(key,&nbsp;subkey[,&nbsp;in_path_none])</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.get_local_config_file.html#libconfig.get_local_config_file" title="libconfig.get_local_config_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_local_config_file</span></code></a>(filename)</td>
+<td>Find local file to setup default values.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/libconfig.get_option.html#libconfig.get_option" title="libconfig.get_option"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_option</span></code></a>(key,&nbsp;subkey[,&nbsp;in_path_none])</td>
 <td>Get the current value of the option.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/libconfig.get_option_default.html#libconfig.get_option_default" title="libconfig.get_option_default"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_option_default</span></code></a>(key,&nbsp;subkey)</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.get_option_default.html#libconfig.get_option_default" title="libconfig.get_option_default"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_option_default</span></code></a>(key,&nbsp;subkey)</td>
 <td>Get the default value of the option.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.get_option_description.html#libconfig.get_option_description" title="libconfig.get_option_description"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_option_description</span></code></a>(key,&nbsp;subkey)</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/libconfig.get_option_description.html#libconfig.get_option_description" title="libconfig.get_option_description"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_option_description</span></code></a>(key,&nbsp;subkey)</td>
 <td>Get the string descriving a particular option.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.ifndef.html#libconfig.ifndef" title="libconfig.ifndef"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ifndef</span></code></a>()</td>
+<td>Equivalent to C’s #IFNDEF.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/libconfig.lock_option.html#libconfig.lock_option" title="libconfig.lock_option"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lock_option</span></code></a>(key,&nbsp;subkey)</td>
 <td>Make an option unmutable.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.register_option.html#libconfig.register_option" title="libconfig.register_option"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_option</span></code></a>(key,&nbsp;subkey,&nbsp;default,&nbsp;_type,&nbsp;…)</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.on_option_value.html#libconfig.on_option_value" title="libconfig.on_option_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_option_value</span></code></a>(*args)</td>
+<td>Temporarily change the configuration values.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/libconfig.register_option.html#libconfig.register_option" title="libconfig.register_option"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_option</span></code></a>(key,&nbsp;subkey,&nbsp;default,&nbsp;_type,&nbsp;…)</td>
 <td>Create a new option.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/libconfig.reset_option.html#libconfig.reset_option" title="libconfig.reset_option"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_option</span></code></a>(key,&nbsp;subkey)</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.reset_option.html#libconfig.reset_option" title="libconfig.reset_option"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_option</span></code></a>(key,&nbsp;subkey)</td>
 <td>Resets a single option to the default values.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.reset_options.html#libconfig.reset_options" title="libconfig.reset_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_options</span></code></a>([empty])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/libconfig.reset_options.html#libconfig.reset_options" title="libconfig.reset_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_options</span></code></a>([empty])</td>
 <td>Empty ALL options.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/libconfig.set_option.html#libconfig.set_option" title="libconfig.set_option"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_option</span></code></a>(key,&nbsp;subkey,&nbsp;value)</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.set_option.html#libconfig.set_option" title="libconfig.set_option"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_option</span></code></a>(key,&nbsp;subkey,&nbsp;value)</td>
 <td>Sets the value of an option.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.set_options_from_file.html#libconfig.set_options_from_file" title="libconfig.set_options_from_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_options_from_file</span></code></a>(filename[,&nbsp;format])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/libconfig.set_options_from_file.html#libconfig.set_options_from_file" title="libconfig.set_options_from_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_options_from_file</span></code></a>(filename[,&nbsp;format])</td>
 <td>Load options from file.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/libconfig.set_options_from_JSON.html#libconfig.set_options_from_JSON" title="libconfig.set_options_from_JSON"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_options_from_JSON</span></code></a>(filename)</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.set_options_from_JSON.html#libconfig.set_options_from_JSON" title="libconfig.set_options_from_JSON"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_options_from_JSON</span></code></a>(filename)</td>
 <td>Load options from a YAML-formated file.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.set_options_from_YAML.html#libconfig.set_options_from_YAML" title="libconfig.set_options_from_YAML"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_options_from_YAML</span></code></a>(filename)</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/libconfig.set_options_from_YAML.html#libconfig.set_options_from_YAML" title="libconfig.set_options_from_YAML"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_options_from_YAML</span></code></a>(filename)</td>
 <td>Load options from a YAML-formated file.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/libconfig.set_options_from_dict.html#libconfig.set_options_from_dict" title="libconfig.set_options_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_options_from_dict</span></code></a>(data_dict)</td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.set_options_from_dict.html#libconfig.set_options_from_dict" title="libconfig.set_options_from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_options_from_dict</span></code></a>(data_dict)</td>
 <td>Load options from a dictionary.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.show_options.html#libconfig.show_options" title="libconfig.show_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_options</span></code></a>([key])</td>
+<tr class="row-even"><td><a class="reference internal" href="generated/libconfig.show_options.html#libconfig.show_options" title="libconfig.show_options"><code class="xref py py-obj docutils literal notranslate"><span class="pre">show_options</span></code></a>([key])</td>
 <td>Returns a copy the options <a class="reference external" href="http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v0.23.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a>.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.unregister_option.html#libconfig.unregister_option" title="libconfig.unregister_option"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unregister_option</span></code></a>(key,&nbsp;subkey)</td>
+<td>Removes an option from the manager.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/libconfig.write_options_to_JSON.html#libconfig.write_options_to_JSON" title="libconfig.write_options_to_JSON"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_options_to_JSON</span></code></a>(filename)</td>
 <td>Writes the options in JSON format to a file.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.write_options_to_YAML.html#libconfig.write_options_to_YAML" title="libconfig.write_options_to_YAML"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_options_to_YAML</span></code></a>(filename)</td>
 <td>Writes the options in YAML format to a file.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/libconfig.get_local_config_file.html#libconfig.get_local_config_file" title="libconfig.get_local_config_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_local_config_file</span></code></a>(filename)</td>
-<td>Find local file to setup default values.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/libconfig.on_option_value.html#libconfig.on_option_value" title="libconfig.on_option_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">on_option_value</span></code></a>(*args)</td>
-<td>Temporarily change the configuration values.</td>
 </tr>
 </tbody>
 </table>

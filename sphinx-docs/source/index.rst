@@ -25,7 +25,7 @@ Basic Example
 -------------
 
 The most expected way to use the library is by creating a ``core`` file in your library in which to setup the global
-values of your library. As an example, a minimized vertion of the configuration of the
+values of your library. As an example, a minimized version of the configuration of the
 `RosettaSilentToolbox <https://github.com/jaumebonet/RosettaSilentToolbox>`_ looks like this:
 
 .. ipython::
@@ -34,23 +34,20 @@ values of your library. As an example, a minimized vertion of the configuration 
      ...:
      ...: from libconfig import *
      ...:
-     ...: try:
+     ...: with ifndef():
+     ...:   # This avoids recalling this every time, as register_option will raise an error when
+     ...:   # trying to re-register. Basically, this is the equivalent to Cpp's #IFDEF
+     ...:
      ...:   # Register IO control options
      ...:   register_option("system", "overwrite",  False, "bool", "Allow overwriting already existing files")
      ...:   register_option("system", "output", "./", "path_out", "Default folder to output generated files")
      ...:   register_option("system", "cpu", multiprocessing.cpu_count() - 1, "int", "Available CPU for multiprocessing")
      ...:
-     ...:   # Finally, register_option and reset_option are taken out from the global view so that
-     ...:   # they are not imported with the rest of the functions. This way the user can not access
-     ...:   # to them when importing the library and has to work through the rest of the available
-     ...:   # functions.
-     ...:   for name in ["register_option", "reset_options"]:
-     ...:     del globals()[name]
-     ...:
-     ...: except Exception:
-     ...:   # This avoids recalling this every time, as register_option will raise an error when
-     ...:   # trying to re-register. Basically, this is the equivalent to Cpp's #IFDEF
-     ...:   pass
+     ...: # Finally, register_option, unregister_option and reset_option are taken out from the global view
+     ...: # so that they are not imported with the rest of the functions. This way the user can not access
+     ...: # them when importing the library and has to work through the rest of the available functions.
+     ...: for name in user_forbidden:
+     ...:   del globals()[name]
 
 This ends up loading a starting set of options:
 
@@ -66,6 +63,14 @@ in a controlled manner by taking out :func:`.register_option` and :func:`.reset_
 One can also make the target library able to be configured through a file defining the values of the registered
 options. Through :func:`.get_local_config_file`, the library will search for a config file in the current working
 directory, the repo root or the user's home, allowing for different levels of specific configuration.
+
+Errors
+------
+
+The library defines two specific errors:
+
+* **AlreadyRegisteredError:** When trying to register an already registered option
+* **NotRegisteredError:** When trying to access a non-registered option.
 
 A list of all the available functions can be found in the :ref:`API <api>`.
 

@@ -10,6 +10,7 @@
 
 
 from .config import *
+from .util import AlreadyRegisteredError, NotRegisteredError
 
 from ._version import get_versions
 __version__ = get_versions()['version']

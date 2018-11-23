@@ -7,7 +7,7 @@
 # @url:    jaumebonet.cat
 #
 # @date:   2017-10-03 14:59:01
-# @Last modified time: 21-Nov-2018
+# @Last modified time: 23-Nov-2018
 #
 # -*-
 import json
@@ -34,15 +34,16 @@ __all__ = ["register_option", "reset_option", "reset_options", "set_option",
            "set_options_from_JSON", "set_options_from_YAML", "get_option",
            "get_option_default", "get_option_description",
            "write_options_to_file", "write_options_to_JSON",
-           "write_options_to_YAML", "show_options",
+           "write_options_to_YAML", "show_options", "unregister_option",
            "lock_option", "check_option", "get_option_alternatives",
            "document_options", "on_option_value",
-           "get_local_config_file"]
+           "get_local_config_file", "ifndef", "user_forbidden"]
 
 
 _columns = ["primary-key", "secondary-key", "value", "type",
             "default", "locked", "description", "values"]
 
+user_forbidden = ["register_option", "unregister_option", "reset_option"]
 
 _global_config = pd.DataFrame(columns=_columns)
 
@@ -95,7 +96,8 @@ def register_option(key, subkey, default, _type, definition,
     :param bool locked: If True, option cannot be altered.
 
     :raise:
-        :KeyError: If ``key`` or ``subkey`` already define an option.
+        :AlreadyRegisteredError: If ``key`` or ``subkey`` already
+            define an option.
 
     """
     ev.value_eval(default, _type)
@@ -105,6 +107,24 @@ def register_option(key, subkey, default, _type, definition,
                          locked, definition, values], index=_columns)
     global _global_config
     _global_config = _global_config.append(new_opt, ignore_index=True)
+
+
+@util.lower_keynames
+@util.entry_must_exist
+def unregister_option(key, subkey):
+    """Removes an option from the manager.
+
+    :param str key: First identifier of the option.
+    :param str subkey: Second identifier of the option.
+
+    raise:
+        :NotRegisteredError: If ``key`` or ``subkey`` do not define any option.
+    """
+    global _global_config
+    _global_config = _global_config[~(
+                        (_global_config['primary-key'] == key) &
+                        (_global_config['secondary-key'] == subkey)
+                     )]
 
 
 @util.lower_keynames
@@ -120,7 +140,7 @@ def get_option(key, subkey, in_path_none=False):
     :return: Current value of the option (type varies).
 
     :raise:
-        :KeyError: If ``key`` or ``subkey`` do not define any option.
+        :NotRegisteredError: If ``key`` or ``subkey`` do not define any option.
         :ValueError: If a ``in_path`` type with :data:`None` value is
             requested.
     """
@@ -149,7 +169,7 @@ def get_option_default(key, subkey):
     :return: Default value of the option (type varies).
 
     :raise:
-        :KeyError: If ``key`` or ``subkey`` do not define any option.
+        :NotRegisteredError: If ``key`` or ``subkey`` do not define any option.
     """
     df = _get_df(key, subkey)
     if df["type"].values[0] == "bool":
@@ -171,7 +191,7 @@ def get_option_description(key, subkey):
     :return: :class:`str` - description of the option.
 
     :raise:
-        :KeyError: If ``key`` or ``subkey`` do not define any option.
+        :NotRegisteredError: If ``key`` or ``subkey`` do not define any option.
     """
     return _get_df(key, subkey)["description"].values[0]
 
@@ -188,7 +208,7 @@ def get_option_alternatives(key, subkey):
         for the option, if any specified (otherwise, is open).
 
     :raise:
-        :KeyError: If ``key`` or ``subkey`` do not define any option.
+        :NotRegisteredError: If ``key`` or ``subkey`` do not define any option.
     """
     return _get_df(key, subkey)["values"].values[0]
 
@@ -203,7 +223,7 @@ def set_option(key, subkey, value):
     :param value: New value for the option (type varies).
 
     :raise:
-        :KeyError: If ``key`` or ``subkey`` do not define any option.
+        :NotRegisteredError: If ``key`` or ``subkey`` do not define any option.
         :ValueError: If the targeted obtion is locked.
         :ValueError: If the provided value is not the expected
             type for the option.
@@ -239,7 +259,7 @@ def check_option(key, subkey, value):
     :return: :class:`bool` - does ``value`` belong to the options?
 
     :raise:
-        :KeyError: If ``key`` or ``subkey`` do not define any option.
+        :NotRegisteredError: If ``key`` or ``subkey`` do not define any option.
         :ValueError: If the provided value is not the expected
             type for the option.
     """
@@ -259,7 +279,7 @@ def reset_option(key, subkey):
     :param str subkey: Second identifier of the option.
 
     :raise:
-        :KeyError: If ``key`` or ``subkey`` do not define any option.
+        :NotRegisteredError: If ``key`` or ``subkey`` do not define any option.
         :ValueError: If the targeted obtion is locked.
     """
     df = _get_df(key, subkey)
@@ -281,7 +301,7 @@ def lock_option(key, subkey):
     :param str subkey: Second identifier of the option.
 
     :raise:
-        :KeyError: If ``key`` or ``subkey`` do not define any option.
+        :NotRegisteredError: If ``key`` or ``subkey`` do not define any option.
     """
     global _global_config
     _global_config.loc[
@@ -515,16 +535,18 @@ class on_option_value(object):
         In [1]: import libconfig as cfg
            ...: cfg.register_option('opt', 'one', 1, 'int', 'option 1')
            ...: cfg.register_option('opt', 'two', 2, 'int', 'option 2')
-           ...: print(cfg.get_option('opt', 'one'))
+           ...: print('opt.one', cfg.get_option('opt', 'one'))
            ...: with cfg.on_option_value('opt', 'one', 10):
-           ...:     print(cfg.get_option('opt', 'one'))
-           ...: print(cfg.get_option('opt', 'one'))
-           ...: print(cfg.get_option('opt', 'two'))
+           ...:     print('with opt.one', cfg.get_option('opt', 'one'))
+           ...: print('opt.one', cfg.get_option('opt', 'one'))
+           ...: print('opt.two', cfg.get_option('opt', 'two'))
            ...: with cfg.on_option_value('opt', 'one', 10, 'opt', 'two', 20):
-           ...:     print(cfg.get_option('opt', 'one'))
-           ...:     print(cfg.get_option('opt', 'two'))
-           ...: print(cfg.get_option('opt', 'one'))
-           ...: print(cfg.get_option('opt', 'two'))
+           ...:     print('with opt.one', cfg.get_option('opt', 'one'))
+           ...:     print('with opt.two', cfg.get_option('opt', 'two'))
+           ...: print('opt.one', cfg.get_option('opt', 'one'))
+           ...: print('opt.two', cfg.get_option('opt', 'two'))
+           ...: cfg.unregister_option('opt', 'one')
+           ...: cfg.unregister_option('opt', 'two')
     """
 
     def __init__(self, *args):
@@ -547,3 +569,27 @@ class on_option_value(object):
     def __exit__(self, *args):
         for i, l in self.values.iterrows():
             set_option(l['k1'], l['k2'], l['old_value'])
+
+
+class ifndef(object):
+    """Equivalent to C's #IFNDEF.
+
+    If options are repeatedly registered inside this ``with`` statement, the
+    resulting error is taken care.
+
+    Although in a library the declaration is only going to be done once, it
+    is recomended to go through this process in order to avoid problems with
+    _jupyter_ and the ``%autoreload`` setting.
+    """
+    def __init__(self):
+        global _global_config
+        self.backup = _global_config.copy()
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, type, value, traceback):
+        if isinstance(value, util.AlreadyRegisteredError):
+            global _global_config
+            _global_config = self.backup.copy()
+            return True

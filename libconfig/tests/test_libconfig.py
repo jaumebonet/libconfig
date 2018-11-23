@@ -3,7 +3,7 @@
 # @Email:  jaume.bonet@gmail.com
 # @Filename: test_libconfig.py
 # @Last modified by:   bonet
-# @Last modified time: 21-Nov-2018
+# @Last modified time: 23-Nov-2018
 
 
 import os
@@ -29,7 +29,7 @@ class TestLibConfig(object):
         cfg.register_option("numeric", "float_free", 2.3, "float",
                             "this is a free float")
         assert cfg.get_option("numeric", "float_free") == 2.3
-        with pytest.raises(KeyError):
+        with pytest.raises(cfg.AlreadyRegisteredError):
             cfg.register_option("numeric", "integer_fixed", 2, "int",
                                 "cannot overwrite a register!")
 
@@ -56,7 +56,7 @@ class TestLibConfig(object):
         with pytest.raises(ValueError):
             cfg.register_option("path", "in2", "/no/path/at/all", "path_in",
                                 "it will fail if it doesn't.")
-        with pytest.raises(KeyError):
+        with pytest.raises(cfg.NotRegisteredError):
             cfg.set_option("path", "in2")  # and it won't be registered
         cfg.register_option("path", "out", "/no/path/at/all", "path_out",
                             "this path does not need to exist.")
@@ -68,6 +68,31 @@ class TestLibConfig(object):
 
         assert cfg.get_option_description("string", "option_text") == \
             "this string is limited to some options."
+
+        with cfg.ifndef():
+            cfg.register_option("numeric", "float_free2", 3.4, "float",
+                                "this is another free float")
+
+        with cfg.ifndef():
+            # This ones won't be registered and won't trigger an error.
+            cfg.register_option("test", "pre-error", 3.4, "float",
+                                "this is before")
+            cfg.register_option("numeric", "float_free2", 3.4, "float",
+                                "this is another free float")
+            cfg.register_option("test", "post-error", 3.4, "float",
+                                "this is after")
+
+        cfg.register_option("test", "pre-error", 3.4, "float",
+                            "this is before")
+        cfg.register_option("test", "post-error", 3.5, "float",
+                            "this is after")
+        assert cfg.get_option("test", "pre-error") == 3.4
+        assert cfg.get_option("test", "post-error") == 3.5
+        cfg.unregister_option("test", "pre-error")
+        with pytest.raises(cfg.NotRegisteredError):
+            cfg.get_option("test", "pre-error")
+        assert cfg.get_option("test", "post-error") == 3.5
+        cfg.unregister_option("test", "post-error")
 
     def test_locked_and_limited_options(self):
         """
@@ -156,6 +181,7 @@ class TestLibConfig(object):
             'non-defined path.',
             '    **path**            **out**  this path does not '
             'need to exist.',
+            ' **numeric**    **float_free2**  this is another free float',
             '============  =================  ==========='
         ]
         assert cfg.document_options() == "\n".join(data)
