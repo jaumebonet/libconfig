@@ -19,6 +19,7 @@ Functions
    ~get_option
    ~get_option_default
    ~get_option_description
+   ~get_option_type
    ~ifndef
    ~lock_option
    ~on_option_value

@@ -1,22 +1,17 @@
-# -*-
-# @project: libconfig
-# @file:    config.py
-#
-# @author: jaume.bonet
-# @email:  jaume.bonet@gmail.com
-# @url:    jaumebonet.cat
-#
-# @date:   2017-10-03 14:59:01
-# @Last modified time: 23-Nov-2018
-#
-# -*-
+# -*- coding: utf-8 -*-
+"""
+.. codeauthor:: Jaume Bonet <jaume.bonet@gmail.com>
+"""
+# Standard Libraries
 import json
 import os
 
+# External Libraries
 import pandas as pd
 import yaml
 import six
 
+# This Library
 import libconfig.evaluator as ev
 import libconfig.util as util
 
@@ -56,6 +51,7 @@ def _get_df(key, subkey):
 
 def _options_to_dict():
     kolums = ["primary-key", "secondary-key", "value"]
+    global _global_config
     d = _global_config[kolums].values.tolist()
     dc = {}
     for x in d:
@@ -183,7 +179,7 @@ def get_option_default(key, subkey):
 @util.lower_keynames
 @util.entry_must_exist
 def get_option_description(key, subkey):
-    """Get the string descriving a particular option.
+    """Get the string describing a particular option.
 
     :param str key: First identifier of the option.
     :param str subkey: Second identifier of the option.
@@ -194,6 +190,22 @@ def get_option_description(key, subkey):
         :NotRegisteredError: If ``key`` or ``subkey`` do not define any option.
     """
     return _get_df(key, subkey)["description"].values[0]
+
+
+@util.lower_keynames
+@util.entry_must_exist
+def get_option_type(key, subkey):
+    """Get the type of a particular option.
+
+    :param str key: First identifier of the option.
+    :param str subkey: Second identifier of the option.
+
+    :return: :class:`str` - description of the type.
+
+    :raise:
+        :NotRegisteredError: If ``key`` or ``subkey`` do not define any option.
+    """
+    return _get_df(key, subkey)["type"].values[0]
 
 
 @util.lower_keynames
@@ -355,7 +367,7 @@ def set_options_from_YAML(filename):
         raise IOError("File {0} not found".format(filename))
     stream = open(filename)
     data_dict = yaml.safe_load(stream)
-    set_options_from_dict(data_dict)
+    set_options_from_dict(data_dict, filename)
 
 
 def set_options_from_JSON(filename):
@@ -370,7 +382,7 @@ def set_options_from_JSON(filename):
         raise IOError("File {0} not found".format(filename))
     data_str = "".join([x.strip() for x in open(filename).readlines()])
     data_dict = json.loads(data_str)
-    set_options_from_dict(data_dict)
+    set_options_from_dict(data_dict, filename)
 
 
 def set_options_from_file(filename, format='yaml'):
@@ -393,15 +405,21 @@ def set_options_from_file(filename, format='yaml'):
         raise ValueError('Unknown format {}'.format(format))
 
 
-def set_options_from_dict(data_dict):
+def set_options_from_dict(data_dict, filename=None):
     """Load options from a dictionary.
 
     :param dict data_dict: Dictionary with the options to load.
+    :param str filename: If provided, assume that non-absolute
+        paths provided are in reference to the file.
     """
+    if filename is not None:
+        filename = os.path.dirname(filename)
     for k in data_dict:
         if not isinstance(data_dict[k], dict):
             raise ValueError("The input data has to be a dict of dict")
         for sk in data_dict[k]:
+            if _get_df(k, sk).shape[0] == 0:
+                continue
             if isinstance(data_dict[k][sk], six.string_types):
                 data_dict[k][sk] = str(data_dict[k][sk])
             _type = _get_df(k, sk)[["type"]].values[0]
@@ -409,6 +427,13 @@ def set_options_from_dict(data_dict):
             if get_option(k, sk, True) != data_dict[k][sk]:
                 try:
                     set_option(k, sk, data_dict[k][sk])
+                # Provided paths do not work: try add them relative
+                # to the config file
+                except IOError:
+                    if filename is None:
+                        raise IOError('Error in path: {0}.{1}'.format(k, sk))
+                    npat = os.path.join(filename, data_dict[k][sk])
+                    set_option(k, sk, os.path.normpath(npat))
                 except ValueError:
                     pass  # locked options will not be changed
 
@@ -515,9 +540,8 @@ def get_local_config_file(filename):
             else:
                 raise Exception()
         except Exception:
-            config_home = os.path.join(os.getenv("HOME",
-                                                 os.path.expanduser("~")),
-                                       filename)
+            home = os.getenv("HOME", os.path.expanduser("~"))
+            config_home = os.path.join(home, filename)
             if os.path.isfile(config_home):
                 return config_home
     return None
