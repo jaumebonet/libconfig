@@ -15,9 +15,9 @@ import six
 import libconfig.evaluator as ev
 
 if six.PY2:
-    from subprocess import check_output, CalledProcessError
+    from subprocess import check_output, CalledProcessError    # nosec
 else:
-    from subprocess import run, PIPE
+    from subprocess import run, PIPE    # nosec
 
 
 pd.set_option('display.max_colwidth', -1)
@@ -360,24 +360,24 @@ class Config(object):
         data_dict = json.loads(data_str)
         self.set_options_from_dict(data_dict, filename)
 
-    def set_options_from_file(self, filename, format='yaml'):
+    def set_options_from_file(self, filename, file_format='yaml'):
         """Load options from file.
 
         This is a wrapper over :func:`.set_options_from_JSON` and
         :func:`.set_options_from_YAML`.
 
         :param str filename: File from which to load the options.
-        :param str format: File format (``yaml`` or ``json``).
+        :param str file_format: File format (``yaml`` or ``json``).
 
         :raises:
             :ValueError: If an unknown ``format`` is requested.
         """
-        if format.lower() == 'yaml':
+        if file_format.lower() == 'yaml':
             return self.set_options_from_YAML(filename)
-        elif format.lower() == 'json':
+        elif file_format.lower() == 'json':
             return self.set_options_from_JSON(filename)
         else:
-            raise ValueError('Unknown format {}'.format(format))
+            raise ValueError('Unknown format {}'.format(file_format))
 
     def set_options_from_dict(self, data_dict, filename=None):
         """Load options from a dictionary.
@@ -413,24 +413,24 @@ class Config(object):
                     except ValueError:
                         pass  # locked options will not be changed
 
-    def write_options_to_file(self, filename, format='yaml'):
+    def write_options_to_file(self, filename, file_format='yaml'):
         """Write options to file.
 
         This is a wrapper over :func:`.write_options_to_JSON` and
         :func:`.write_options_to_YAML`.
 
         :param str filename: Target file to write the options.
-        :param str format: File format (``yaml`` or ``json``).
+        :param str file_format: File format (``yaml`` or ``json``).
 
         :raises:
             :ValueError: If an unknown ``format`` is requested.
         """
-        if format.lower() == 'yaml':
+        if file_format.lower() == 'yaml':
             self.write_options_to_YAML(filename)
-        elif format.lower() == 'json':
+        elif file_format.lower() == 'json':
             self.write_options_to_JSON(filename)
         else:
-            raise ValueError('Unknown format {}'.format(format))
+            raise ValueError('Unknown format {}'.format(file_format))
 
     def write_options_to_YAML(self, filename):
         """Writes the options in YAML format to a file.
@@ -577,10 +577,14 @@ class ONVALUE(object):
              for _, l in self.values.iterrows()]
 
     def __enter__(self):
+        """On enter, each requested option is changed by the new value.
+        """
         for i, l in self.values.iterrows():
             self.cfg.set_option(l['k1'], l['k2'], l['new_value'])
 
     def __exit__(self, *args):
+        """On exit, the original values of the options are retrieved back.
+        """
         for i, l in self.values.iterrows():
             self.cfg.set_option(l['k1'], l['k2'], l['old_value'])
 
@@ -600,15 +604,22 @@ class IFNDEF(object):
         self.backup = config.gc.copy()
 
     def __enter__(self):
+        """Nothing is setup on entry.
+        """
         pass
 
     def __exit__(self, type, value, traceback):
+        """If the execution fails, just keep the configutation as it was
+        before.
+        """
         if isinstance(value, AlreadyRegisteredError):
             self.cfg.gc = self.backup.copy()
             return True
 
 
 def _options_to_dict(df):
+    """Make a dictionary to print.
+    """
     kolums = ["k1", "k2", "value"]
     d = df[kolums].values.tolist()
     dc = {}
@@ -619,18 +630,22 @@ def _options_to_dict(df):
 
 
 def _get_repo():
+    """Identify the path to the repository origin.
+    """
     command = ['git', 'rev-parse', '--show-toplevel']
     if six.PY2:
         try:
-            return check_output(command) .decode('utf-8').strip()
+            return check_output(command).decode('utf-8').strip()    # nosec
         except CalledProcessError:
             return ''
     else:
         return (run(command, stdout=PIPE, stderr=PIPE)
-                .stdout.decode('utf-8').strip())
+                .stdout.decode('utf-8').strip())    # nosec
 
 
 def _lower_keys(key, subkey):
+    """Make sure keys are always lower key.
+    """
     return key.lower(), subkey.lower()
 
 
