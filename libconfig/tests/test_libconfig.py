@@ -1,16 +1,16 @@
-# @Author: Jaume Bonet <bonet>
-# @Date:   04-Apr-2018
-# @Email:  jaume.bonet@gmail.com
-# @Filename: test_libconfig.py
-# @Last modified by:   bonet
-# @Last modified time: 23-Nov-2018
-
-
+# -*- coding: utf-8 -*-
+"""
+.. codeauthor:: Jaume Bonet <jaume.bonet@gmail.com>
+"""
+# Standard Libraries
 import os
 
+# External Libraries
 import pytest
 
-import libconfig as cfg
+# This Library
+import libconfig
+cfg = libconfig.Config()
 
 
 class TestLibConfig(object):
@@ -29,7 +29,7 @@ class TestLibConfig(object):
         cfg.register_option("numeric", "float_free", 2.3, "float",
                             "this is a free float")
         assert cfg.get_option("numeric", "float_free") == 2.3
-        with pytest.raises(cfg.AlreadyRegisteredError):
+        with pytest.raises(libconfig.AlreadyRegisteredError):
             cfg.register_option("numeric", "integer_fixed", 2, "int",
                                 "cannot overwrite a register!")
 
@@ -53,11 +53,11 @@ class TestLibConfig(object):
         with pytest.raises(ValueError):
             # which rises error if trying to access it.
             cfg.get_option("path", "inNone")
-        with pytest.raises(ValueError):
+        with pytest.raises(IOError):
             cfg.register_option("path", "in2", "/no/path/at/all", "path_in",
                                 "it will fail if it doesn't.")
-        with pytest.raises(cfg.NotRegisteredError):
-            cfg.set_option("path", "in2")  # and it won't be registered
+        with pytest.raises(libconfig.NotRegisteredError):
+            cfg.get_option("path", "in2")  # and it won't be registered
         cfg.register_option("path", "out", "/no/path/at/all", "path_out",
                             "this path does not need to exist.")
         assert cfg.get_option("path", "out") == "/no/path/at/all"
@@ -89,7 +89,7 @@ class TestLibConfig(object):
         assert cfg.get_option("test", "pre-error") == 3.4
         assert cfg.get_option("test", "post-error") == 3.5
         cfg.unregister_option("test", "pre-error")
-        with pytest.raises(cfg.NotRegisteredError):
+        with pytest.raises(libconfig.NotRegisteredError):
             cfg.get_option("test", "pre-error")
         assert cfg.get_option("test", "post-error") == 3.5
         cfg.unregister_option("test", "post-error")
@@ -129,7 +129,7 @@ class TestLibConfig(object):
         assert cfg.get_option("string", "free_text") == "epsilon"
 
         cfg.set_option("path", "in", os.getcwd())
-        with pytest.raises(ValueError):
+        with pytest.raises(IOError):
             cfg.set_option("path", "in", "/not/a/real/path")
         assert cfg.get_option("path", "in") == os.getcwd()
 
