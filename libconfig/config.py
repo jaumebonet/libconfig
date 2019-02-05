@@ -297,8 +297,11 @@ class Config(object):
             (self.gc["k2"] == subkey), "locked"] = True
 
     def lock_configuration(self):
-        """Do not allow calls to :meth:`.Config.register_option` or
-        :meth:`.Config.unregister_option`
+        """Do not allow calls to methods that should not be accessible by the
+        user.
+
+        This includes :meth:`.Config.register_option` and
+        :meth:`.Config.unregister_option`.
         """
         self.open = False
 
@@ -313,7 +316,7 @@ class Config(object):
 
         :return: :class:`~pandas.DataFrame`
         """
-        key, subkey = _lower_keys(key, '')
+        key, _ = _lower_keys(key, '')
 
         if key == "":
             return self.gc.copy()
@@ -477,7 +480,8 @@ class Config(object):
         data.append(separators)
         return "\n".join(data)
 
-    def get_local_config_file(self, filename):
+    @classmethod
+    def get_local_config_file(cls, filename):
         """Find local file to setup default values.
 
         There is a pre-fixed logic on how the search of the configuration
@@ -530,35 +534,35 @@ class Config(object):
         return IFNDEF(self)
 
     def on_option_value(self, *args):
+        """Temporarily change the configuration values.
+
+        :raises:
+            :ValueError: If the number of parameters cannot be casted into
+                one or multiple options.
+
+        .. ipython::
+
+            In [1]: from libconfig import Config
+               ...: c = Config()
+               ...: c.register_option('opt', 'on', 1, 'int', 'option 1')
+               ...: c.register_option('opt', 'tw', 2, 'int', 'option 2')
+               ...: print('opt.one', c.get_option('opt', 'on'))
+               ...: with c.on_option_value('opt', 'on', 10):
+               ...:     print('with opt.one', c.get_option('opt', 'on'))
+               ...: print('opt.one', c.get_option('opt', 'on'))
+               ...: print('opt.two', c.get_option('opt', 'tw'))
+               ...: with c.on_option_value('opt', 'on', 10, 'opt', 'tw', 20):
+               ...:     print('with opt.one', c.get_option('opt', 'on'))
+               ...:     print('with opt.two', c.get_option('opt', 'tw'))
+               ...: print('opt.one', c.get_option('opt', 'on'))
+               ...: print('opt.two', c.get_option('opt', 'tw'))
+               ...: c.unregister_option('opt', 'on')
+               ...: c.unregister_option('opt', 'tw')
+        """
         return ONVALUE(self, *args)
 
 
 class ONVALUE(object):
-    """Temporarily change the configuration values.
-
-    :raises:
-        :ValueError: If the number of parameters cannot be casted into
-            one or multiple options.
-
-    .. ipython::
-
-        In [1]: import libconfig as cfg
-           ...: cfg.register_option('opt', 'one', 1, 'int', 'option 1')
-           ...: cfg.register_option('opt', 'two', 2, 'int', 'option 2')
-           ...: print('opt.one', cfg.get_option('opt', 'one'))
-           ...: with cfg.on_option_value('opt', 'one', 10):
-           ...:     print('with opt.one', cfg.get_option('opt', 'one'))
-           ...: print('opt.one', cfg.get_option('opt', 'one'))
-           ...: print('opt.two', cfg.get_option('opt', 'two'))
-           ...: with cfg.on_option_value('opt', 'one', 10, 'opt', 'two', 20):
-           ...:     print('with opt.one', cfg.get_option('opt', 'one'))
-           ...:     print('with opt.two', cfg.get_option('opt', 'two'))
-           ...: print('opt.one', cfg.get_option('opt', 'one'))
-           ...: print('opt.two', cfg.get_option('opt', 'two'))
-           ...: cfg.unregister_option('opt', 'one')
-           ...: cfg.unregister_option('opt', 'two')
-    """
-
     def __init__(self, *args):
         def chunks(l, n):
             for i in range(0, len(l), n):
@@ -590,15 +594,6 @@ class ONVALUE(object):
 
 
 class IFNDEF(object):
-    """Equivalent to C's #IFNDEF.
-
-    If options are repeatedly registered inside this ``with`` statement, the
-    resulting error is taken care.
-
-    Although in a library the declaration is only going to be done once, it
-    is recomended to go through this process in order to avoid problems with
-    _jupyter_ and the ``%autoreload`` setting.
-    """
     def __init__(self, config):
         self.cfg = config
         self.backup = config.gc.copy()
