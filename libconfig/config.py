@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+A configuration library for libraries.
+
 .. codeauthor:: Jaume Bonet <jaume.bonet@gmail.com>
 """
 # Standard Libraries
@@ -297,8 +299,7 @@ class Config(object):
             (self.gc["k2"] == subkey), "locked"] = True
 
     def lock_configuration(self):
-        """Do not allow calls to methods that should not be accessible by the
-        user.
+        """Do not allow calls that should not be accessible by the user.
 
         This includes :meth:`.Config.register_option` and
         :meth:`.Config.unregister_option`.
@@ -581,15 +582,13 @@ class ONVALUE(object):
              for _, l in self.values.iterrows()]
 
     def __enter__(self):
-        """On enter, each requested option is changed by the new value.
-        """
+        """On enter, each requested option is changed by the new value."""
         for i, l in self.values.iterrows():
             self.cfg.set_option(l['k1'], l['k2'], l['new_value'])
 
     def __exit__(self, *args):
-        """On exit, the original values of the options are retrieved back.
-        """
-        for i, l in self.values.iterrows():
+        """On exit, the original values of the options are retrieved back."""
+        for _, l in self.values.iterrows():
             self.cfg.set_option(l['k1'], l['k2'], l['old_value'])
 
 
@@ -603,18 +602,17 @@ class IFNDEF(object):
         """
         pass
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         """If the execution fails, just keep the configutation as it was
         before.
         """
-        if isinstance(value, AlreadyRegisteredError):
+        if isinstance(exc_value, AlreadyRegisteredError):
             self.cfg.gc = self.backup.copy()
             return True
 
 
 def _options_to_dict(df):
-    """Make a dictionary to print.
-    """
+    """Make a dictionary to print."""
     kolums = ["k1", "k2", "value"]
     d = df[kolums].values.tolist()
     dc = {}
@@ -625,8 +623,7 @@ def _options_to_dict(df):
 
 
 def _get_repo():
-    """Identify the path to the repository origin.
-    """
+    """Identify the path to the repository origin."""
     command = ['git', 'rev-parse', '--show-toplevel']
     if six.PY2:
         try:
@@ -639,14 +636,12 @@ def _get_repo():
 
 
 def _lower_keys(key, subkey):
-    """Make sure keys are always lower key.
-    """
+    """Make sure keys are always lower key."""
     return key.lower(), subkey.lower()
 
 
 def _entry_must_exist(df, k1, k2):
-    """
-    *Decorator* to evaluate key-subkey existence.
+    """Evaluate key-subkey existence.
 
     Checks that the key-subkey combo exists in the
     configuration options.
@@ -659,8 +654,7 @@ def _entry_must_exist(df, k1, k2):
 
 
 def _entry_must_not_exist(df, k1, k2):
-    """
-    *Decorator* to evaluate key-subkey non-existence.
+    """Evaluate key-subkey non-existence.
 
     Checks that the key-subkey combo does not exists in the
     configuration options.
