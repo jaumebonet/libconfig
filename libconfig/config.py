@@ -583,7 +583,7 @@ class ONVALUE(object):
 
     def __enter__(self):
         """On enter, each requested option is changed by the new value."""
-        for i, l in self.values.iterrows():
+        for _, l in self.values.iterrows():
             self.cfg.set_option(l['k1'], l['k2'], l['new_value'])
 
     def __exit__(self, *args):
@@ -598,14 +598,11 @@ class IFNDEF(object):
         self.backup = config.gc.copy()
 
     def __enter__(self):
-        """Nothing is setup on entry.
-        """
+        """Nothing is setup on entry."""
         pass
 
     def __exit__(self, exc_type, exc_value, traceback):
-        """If the execution fails, just keep the configutation as it was
-        before.
-        """
+        """If the execution fails, keep previous configutation."""
         if isinstance(exc_value, AlreadyRegisteredError):
             self.cfg.gc = self.backup.copy()
             return True
