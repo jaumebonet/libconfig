@@ -578,7 +578,7 @@ class ONVALUE(object):
         self.values = pd.DataFrame(chunks(args, 3),
                                    columns=['k1', 'k2', 'new_value'])
         self.values['old_value'] = \
-            [self.cfg.get_option(l['k1'], l['k2'])
+            [self.cfg.get_option(l['k1'], l['k2'], in_path_none=True)
              for _, l in self.values.iterrows()]
 
     def __enter__(self):
