@@ -11,7 +11,12 @@
 #
 # -*-
 import os
-from pandas.core.config import (is_int, is_float, is_bool, is_text)
+try:
+    # up until pandas 0.24.2
+    from pandas.core.config import (is_int, is_float, is_bool, is_text)
+except ImportError:
+    # from pandas 0.25.0
+    from pandas._config.config import (is_int, is_float, is_bool, is_text)
 
 __all__ = ["value_eval", "cast"]
 
